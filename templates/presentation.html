@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NK CONSULTANCY - सादरीकरण माहिती</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        .top-navbar { background: linear-gradient(135deg, #0b2545 0%, #13315c 100%); padding: 15px 25px; color: white; border-bottom: 3px solid #c59b27; }
+        .logo-svg-container { width: 56px; height: 56px; background: white; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; padding: 4px; border: 2px solid #c59b27; margin-right: 15px; }
+        .card-custom { border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); background: white; border: none; }
+        .card-header-pres { background: #0b2545; color: white; font-weight: bold; padding: 14px 20px; border-radius: 10px 10px 0 0; }
+    </style>
+</head>
+<body>
+
+<header class="top-navbar">
+    <div class="container-fluid d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+            <div class="logo-svg-container">
+                <svg viewBox="0 0 100 100" width="100%" height="100%">
+                    <circle cx="50" cy="50" r="46" fill="#0b2545" stroke="#c59b27" stroke-width="4"/>
+                    <rect x="30" y="24" width="40" height="52" rx="4" fill="#ffffff"/>
+                    <line x1="38" y1="35" x2="62" y2="35" stroke="#c59b27" stroke-width="3" stroke-linecap="round"/>
+                    <line x1="38" y1="45" x2="62" y2="45" stroke="#0b2545" stroke-width="2" stroke-linecap="round"/>
+                    <line x1="38" y1="54" x2="55" y2="54" stroke="#0b2545" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M62 60 L74 44 L67 38 L54 53 Z" fill="#c59b27"/>
+                    <circle cx="48" cy="63" r="6" fill="none" stroke="#c59b27" stroke-width="2"/>
+                </svg>
+            </div>
+            <div>
+                <h2 class="m-0 fw-bold fs-3">NK CONSULTANCY</h2>
+                <div style="color: #c59b27; font-size: 13px; font-weight: bold;">दस्त नोंदणी व प्रशासकीय सल्लागार सेवा</div>
+            </div>
+        </div>
+        <div>
+            <span class="badge bg-warning text-dark px-3 py-2 fs-6">
+                टोकन: <strong id="lblTokenNo">जनरेट होत आहे...</strong>
+            </span>
+        </div>
+    </div>
+</header>
+
+<main class="container my-4">
+    <div class="card card-custom">
+        <div class="card-header-pres d-flex justify-content-between align-items-center">
+            <span>सादरीकरण माहिती १ (Presentation Details)</span>
+            <small class="text-warning">गाव: {{ village }} | तालुका: {{ taluka }} | जिल्हा: {{ district }}</small>
+        </div>
+        <div class="card-body p-4">
+            <form action="/property_details" method="GET">
+                <input type="hidden" name="district" value="{{ district }}">
+                <input type="hidden" name="taluka" value="{{ taluka }}">
+                <input type="hidden" name="village" value="{{ village }}">
+                <input type="hidden" name="token_no" id="hiddenTokenNo" value="">
+
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">अनुच्छेद निवडा (Select Article) *</label>
+                        <select name="cboArticle" id="cboArticle" class="form-select" onchange="onArticleChange()" required>
+                            <option value="25" selected>25-अभिहस्तांतरणपत्र</option>
+                            <option value="34">34-दान</option>
+                            <option value="36">36-भाडेपट्टा</option>
+                            <option value="71">36-अ-लिव्ह अॅड लायसन्सेस</option>
+                            <option value="40">40-गहाणखत</option>
+                            <option value="46">46-वाटणी- त्यासंबंधी संलेख</option>
+                            <option value="47">47-भागीदारी</option>
+                            <option value="48">48-मुखत्यारनामा</option>
+                            <option value="51">51-गहाण मालमत्तेचे प्रत्यंतरणपत्र</option>
+                            <option value="52">52-परिमोचनपत्र (रिलीज)</option>
+                            <option value="63">63-मृत्युपत्र</option>
+                            <option value="65">65-चुक दुरुस्ती पत्र</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">दस्ताचे शीर्षक (Document Title) *</label>
+                        <select name="cboArticleDescription" id="cboArticleDescription" class="form-select" required>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">दस्त सादर केल्याचा दिनांक *</label>
+                        <input type="date" name="txtDateOfPresentation" id="txtDateOfPresentation" class="form-control" readonly required>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">बाजार भाव / बाजारमूल्य (Market Value ₹) *</label>
+                        <input type="number" name="txtMarketValue" id="txtMarketValue" class="form-control" placeholder="उदा. 1805000" required>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">मोबदला रक्कम (Consideration Amount ₹) *</label>
+                        <input type="number" name="txtConsiderationAmount" id="txtConsiderationAmount" class="form-control" value="0" required>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between mt-5 pt-3 border-top">
+                    <a href="/" class="btn btn-warning px-4 fw-bold">Previous / मागे</a>
+                    <button type="submit" class="btn btn-success px-5 fw-bold">Next / पुढे</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+
+<script>
+function generateAutoToken() {
+    const now = new Date();
+    const year = now.getFullYear().toString().slice(-2);
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const randomSuffix = Math.floor(100000 + Math.random() * 900000);
+    const generatedToken = "33" + year + month + day + randomSuffix.toString().slice(-3);
+    
+    document.getElementById("lblTokenNo").innerText = generatedToken;
+    document.getElementById("hiddenTokenNo").value = generatedToken;
+}
+
+const today = new Date().toISOString().split('T')[0];
+document.getElementById('txtDateOfPresentation').value = today;
+
+const titleData = {
+    "25": [
+        "अभिहस्तांतरणपत्र", "खरेदीखत", "खुषखरेदीखत", "फरोक्तखरेदीखत", "विक्रीपत्र", 
+        "विक्री करारनामा", "साठेखत", "अँग्रीमेंट टू सेल", "सेल डीड", "कन्व्हेन्स डीड", 
+        "ट्रान्सफर डीड", "हस्तांतरणपत्र", "तबदीलपत्र", "असाईनमेंट डीड", "बयनामा", "इकरारनामा", 
+        "इसार पावती", "ताबापावती", "करारनामा", "कायम खुषखरेदीखत", "मानीव अभिहस्तांतरण"
+    ],
+    "34": ["बक्षीसपत्र", "गिफ्ट", "दानपत्र", "हिबानामा", "अविभाज्य हिश्याचे अंशतः बक्षिसपत्र", "अविभाज्य हिश्याचे पूर्ण बक्षिसपत्र"],
+    "36": ["भाडेपट्टा लेख", "लीज डीड", "भाडेकरार"],
+    "71": ["लिव्ह अँड लायसन्स करारनामा"],
+    "40": ["गहाणखत", "साधे गहाणखत", "ताब्यासह गहाणखत"],
+    "46": ["वाटणीपत्र", "संमती वाटणीपत्र"],
+    "48": ["कुलमुखत्यारपत्र (General POA)", "विशेष मुखत्यारपत्र (Special POA)"],
+    "52": ["हक्कसोडपत्र (Release Deed)"],
+    "63": ["मृत्युपत्र (Will)"]
+};
+
+function onArticleChange() {
+    const art = document.getElementById("cboArticle").value;
+    const descSelect = document.getElementById("cboArticleDescription");
+    descSelect.innerHTML = "";
+
+    const list = titleData[art] || ["दस्तऐवज", "करारनामा", "इतर शीर्षक"];
+    list.forEach((item, index) => {
+        let opt = document.createElement("option");
+        opt.value = item;
+        opt.textContent = item;
+        if(index === 0) opt.selected = true;
+        descSelect.appendChild(opt);
+    });
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    generateAutoToken();
+    onArticleChange();
+});
+</script>
+</body>
+</html>

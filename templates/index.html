@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NK CONSULTANCY - पक्षकार व मोबदला तपशील</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-navy: #0b2545;
+            --accent-gold: #c59b27;
+            --bg-light: #f4f6f9;
+        }
+        body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, sans-serif; }
+        .top-navbar { background: linear-gradient(135deg, #0b2545 0%, #13315c 100%); padding: 15px 25px; color: white; border-bottom: 3px solid var(--accent-gold); }
+        .logo-svg-container { width: 56px; height: 56px; background: white; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; padding: 4px; border: 2px solid var(--accent-gold); margin-right: 15px; }
+        .card-box { border-radius: 10px; border-top: 4px solid #0b2545; box-shadow: 0 4px 12px rgba(0,0,0,0.08); background: white; margin-bottom: 25px; }
+        .scan-card { background: #eef6ff; border: 1px dashed #0b2545; border-radius: 8px; padding: 12px; }
+        .table-custom th { background-color: #0b2545; color: white; }
+        .req { color: red; font-weight: bold; }
+        .footer-bar { text-align: center; padding: 15px 0; font-size: 14px; color: #555; background: #e9ecef; border-top: 1px solid #dee2e6; margin-top: 40px; }
+    </style>
+</head>
+<body>
+
+<header class="top-navbar mb-4">
+    <div class="container-fluid d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+            <div class="logo-svg-container">
+                <svg viewBox="0 0 100 100" width="100%" height="100%">
+                    <circle cx="50" cy="50" r="46" fill="#0b2545" stroke="#c59b27" stroke-width="4"/>
+                    <rect x="30" y="24" width="40" height="52" rx="4" fill="#ffffff"/>
+                    <line x1="38" y1="35" x2="62" y2="35" stroke="#c59b27" stroke-width="3" stroke-linecap="round"/>
+                    <line x1="38" y1="45" x2="62" y2="45" stroke="#0b2545" stroke-width="2" stroke-linecap="round"/>
+                    <line x1="38" y1="54" x2="55" y2="54" stroke="#0b2545" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M62 60 L74 44 L67 38 L54 53 Z" fill="#c59b27"/>
+                    <circle cx="48" cy="63" r="6" fill="none" stroke="#c59b27" stroke-width="2"/>
+                </svg>
+            </div>
+            <div>
+                <h2 class="m-0 fw-bold fs-3">NK CONSULTANCY</h2>
+                <div style="color: #c59b27; font-size: 13px; font-weight: bold;">दस्त नोंदणी व प्रशासकीय सल्लागार सेवा</div>
+            </div>
+        </div>
+        <div>
+            <span class="badge bg-warning text-dark px-3 py-2 fs-6">
+                टोकन: <strong>{{ token_no or '33251261011' }}</strong>
+            </span>
+        </div>
+    </div>
+</header>
+
+<div class="container mb-5">
+    <!-- विभाग १: पक्षकार नोंदणी व स्कॅनिंग -->
+    <div class="card card-box p-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="text-primary fw-bold m-0"><i class="fa fa-users me-2"></i>१. पक्षकारांची माहिती संकलन</h4>
+            <span class="badge bg-info text-dark fs-6">दस्त प्रकार: <strong>{{ article_desc or 'खरेदीपत्र' }}</strong></span>
+        </div>
+
+        <!-- थेट कॅमेरा स्कॅनिंग पर्याय -->
+        <div class="row g-2 mb-3">
+            <div class="col-md-4">
+                <div class="scan-card text-center">
+                    <label class="fw-bold d-block text-dark mb-1">१. आधार समोर (Front)</label>
+                    <input type="file" id="aadhaarFrontFile" accept="image/*" capture="environment" class="form-control form-control-sm mb-2" onchange="scanAadhaarFront()">
+                    <span id="afLoading" class="badge bg-warning text-dark d-none"><i class="fa fa-spinner fa-spin"></i> स्कॅन होत आहे...</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="scan-card text-center">
+                    <label class="fw-bold d-block text-dark mb-1">२. आधार मागील बाजू (पत्ता)</label>
+                    <input type="file" id="aadhaarBackFile" accept="image/*" capture="environment" class="form-control form-control-sm mb-2" onchange="scanAadhaarBack()">
+                    <span id="abLoading" class="badge bg-warning text-dark d-none"><i class="fa fa-spinner fa-spin"></i> स्कॅन होत आहे...</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="scan-card text-center">
+                    <label class="fw-bold d-block text-secondary mb-1">३. पॅन कार्ड समोर</label>
+                    <input type="file" id="panFile" accept="image/*" capture="environment" class="form-control form-control-sm mb-2" onchange="scanPan()">
+                    <span id="panLoading" class="badge bg-warning text-dark d-none"><i class="fa fa-spinner fa-spin"></i> स्कॅन होत आहे...</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label fw-bold">पक्षकाराचा प्रकार <span class="req">*</span></label>
+                <select id="partyType" class="form-select" required>
+                    <option value="लिहून देणार" selected>लिहून देणार</option>
+                    <option value="लिहून घेणार">लिहून घेणार</option>
+                    <option value="संमती देणार">संमती देणार</option>
+                    <option value="साक्षीदार">साक्षीदार</option>
+                </select>
+            </div>
+            <div class="col-md-8">
+                <label class="form-label fw-bold">पूर्ण नाव <span class="req">*</span></label>
+                <input type="text" id="partyName" class="form-control" placeholder="उदा. नंदकुमार दिलीप बेलेकर" required>
+            </div>
+
+            <!-- वय किंवा जन्मतारीख -->
+            <div class="col-md-3">
+                <label class="form-label fw-bold">जन्मतारीख (ऐच्छिक)</label>
+                <input type="date" id="partyDob" class="form-control" onchange="calculateAgeFromDob()">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-bold">वय (वर्षे) <span class="req">*</span></label>
+                <input type="number" id="partyAge" class="form-control" placeholder="वय टाका किंवा जन्मतारीख निवडा" required>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-bold">लिंग</label>
+                <select id="partyGender" class="form-select">
+                    <option value="पुरूष" selected>पुरूष</option>
+                    <option value="स्त्री">स्त्री</option>
+                    <option value="इतर">इतर</option>
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-bold">ओळख क्रमांक (आधार)</label>
+                <input type="text" id="aadhaarNo" class="form-control" maxlength="12" placeholder="१२ अंकी क्रमांक" oninput="validateAadhaarInput(this)">
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-bold text-secondary">पॅन क्रमांक</label>
+                <input type="text" id="panNo" class="form-control" maxlength="10" placeholder="उदा. ABCDE1234F">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-bold">मोबाईल क्रमांक</label>
+                <input type="text" id="partyMobile" class="form-control" maxlength="10" placeholder="१० अंकी नंबर">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-bold">पत्ता <span class="req">*</span></label>
+                <textarea id="partyAddress" rows="1" class="form-control" placeholder="रा. पेठ वडगाव, ता. हातकणंगले, जि. कोल्हापूर" required></textarea>
+            </div>
+        </div>
+
+        <div class="text-end mt-3">
+            <button class="btn btn-outline-secondary px-3 me-2" onclick="clearCurrentForm()">क्लिअर</button>
+            <button class="btn btn-primary px-4 fw-bold" onclick="addPartyToList()">
+                <i class="fa fa-plus me-1"></i> हा पक्षकार जोडा (Add Party)
+            </button>
+        </div>
+
+        <!-- पक्षकार यादी -->
+        <div class="table-responsive mt-3">
+            <table class="table table-bordered table-striped table-custom align-middle">
+                <thead>
+                    <tr>
+                        <th style="width: 50px;">क्र.</th>
+                        <th>प्रकार</th>
+                        <th>नाव</th>
+                        <th>वय / जन्मतारीख</th>
+                        <th>पॅन / मोबाईल</th>
+                        <th>पत्ता</th>
+                        <th style="width: 80px;">कृती</th>
+                    </tr>
+                </thead>
+                <tbody id="partyTableBody">
+                    <tr><td colspan="7" class="text-center text-muted">कोणताही पक्षकार जोडलेला नाही. किमान २ पक्षकार जोडा.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- विभाग २: मोबदला व भरणा तपशील (Multi-Payment) -->
+    <div class="card card-box p-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="text-primary fw-bold m-0"><i class="fa fa-money-bill-wave me-2"></i>२. मोबदला व भरणा तपशील (Payment Details)</h4>
+            <span class="badge bg-success fs-6">एकूण भरणा: ₹ <strong id="lblTotalPaid">0</strong></span>
+        </div>
+
+        <div class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label fw-bold">भरणा प्रकार <span class="req">*</span></label>
+                <select id="payMode" class="form-select">
+                    <option value="चेक (Cheque)" selected>चेक (Cheque)</option>
+                    <option value="आर.टी.जी.एस. (RTGS)">आर.टी.जी.एस. (RTGS)</option>
+                    <option value="एन.ई.एफ.टी./ट्रान्सफर (NEFT/Transfer)">ट्रान्सफर / NEFT</option>
+                    <option value="डी.डी. (Demand Draft)">डी.डी. (D.D.)</option>
+                    <option value="रोख (Cash)">रोख (Cash)</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-bold">रक्कम (₹) <span class="req">*</span></label>
+                <input type="number" id="payAmount" class="form-control" placeholder="उदा. 320000">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-bold">चेक / ट्रान्सफर / यूटीआर नं.</label>
+                <input type="text" id="payRefNo" class="form-control" placeholder="उदा. चेक नं. 869909">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-bold">दिनांक</label>
+                <input type="date" id="payDate" class="form-control">
+            </div>
+            <div class="col-md-12">
+                <label class="form-label fw-bold">बँक तपशील व सविस्तर विवरण</label>
+                <input type="text" id="payDetails" class="form-control" placeholder="उदा. स्टेट बँक ऑफ इंडिया शाखा पेठ वडगाव खात्यातून अदा">
+            </div>
+        </div>
+
+        <div class="text-end mt-3">
+            <button class="btn btn-success px-4 fw-bold" onclick="addPaymentRow()">
+                <i class="fa fa-plus me-1"></i> हा भरणा जोडा (Add Payment)
+            </button>
+        </div>
+
+        <!-- भरणा यादी तक्ता -->
+        <div class="table-responsive mt-3">
+            <table class="table table-bordered table-striped table-custom align-middle">
+                <thead>
+                    <tr>
+                        <th style="width: 50px;">अ.नं.</th>
+                        <th>प्रकार</th>
+                        <th>रक्कम (₹)</th>
+                        <th>संदर्भ / क्रमांक</th>
+                        <th>दिनांक</th>
+                        <th>बँक व सविस्तर तपशील</th>
+                        <th style="width: 80px;">कृती</th>
+                    </tr>
+                </thead>
+                <tbody id="paymentTableBody">
+                    <tr><td colspan="7" class="text-center text-muted">अद्याप कोणताही भरणा जोडलेला नाही.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- डाऊनलोड व सबमिशन -->
+    <form action="/generate_docx" method="POST" id="downloadForm">
+        <input type="hidden" name="district" value="{{ district }}">
+        <input type="hidden" name="taluka" value="{{ taluka }}">
+        <input type="hidden" name="village" value="{{ village }}">
+        <input type="hidden" name="token_no" value="{{ token_no }}">
+        <input type="hidden" name="article" value="{{ article }}">
+        <input type="hidden" name="article_desc" value="{{ article_desc or 'खरेदीपत्र' }}">
+        <input type="hidden" name="market_val" value="{{ market_val }}">
+        <input type="hidden" name="consideration_amt" id="finalConsiderationAmt" value="{{ consideration_amt }}">
+        <input type="hidden" name="presentation_date" value="{{ presentation_date }}">
+        <input type="hidden" name="properties_data" value="{{ properties_data }}">
+        <input type="hidden" name="parties_data" id="partiesDataInput">
+        <input type="hidden" name="payments_data" id="paymentsDataInput">
+
+        <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+            <a href="javascript:history.back()" class="btn btn-warning px-4 fw-bold">
+                <i class="fa fa-arrow-left me-1"></i> मागे (Previous)
+            </a>
+            <button type="button" class="btn btn-success btn-lg px-5 fw-bold" onclick="downloadWordFile()">
+                <i class="fa fa-file-word me-2"></i> Word (.docx) मसुदा डाऊनलोड करा
+            </button>
+        </div>
+    </form>
+</div>
+
+<footer class="footer-bar">
+    <div class="container">
+        <strong>NK CONSULTANCY</strong> &copy; 2026 | सर्व हक्क राखीव | दस्त नोंदणी ऑटोमेशन सेवा
+    </div>
+</footer>
+
+<script>
+let partyList = [];
+let paymentList = [];
+
+function validateAadhaarInput(el) {
+    el.value = el.value.replace(/\D/g, '').slice(0, 12);
+}
+
+function calculateAgeFromDob() {
+    const dobVal = document.getElementById('partyDob').value;
+    if (!dobVal) return;
+
+    const dob = new Date(dobVal);
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const monthDiff = today.getMonth() - dob.getMonth();
+
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+        age--;
+    }
+    document.getElementById('partyAge').value = age >= 0 ? age : 0;
+}
+
+function scanAadhaarFront() {
+    let file = document.getElementById('aadhaarFrontFile').files[0];
+    if(!file) return;
+    let formData = new FormData();
+    formData.append('file', file);
+
+    document.getElementById('afLoading').classList.remove('d-none');
+    fetch('/scan_aadhaar_front', { method: 'POST', body: formData })
+    .then(r => r.json())
+    .then(d => {
+        document.getElementById('afLoading').classList.add('d-none');
+        if(d.name) document.getElementById('partyName').value = d.name;
+        if(d.gender) document.getElementById('partyGender').value = d.gender;
+        if(d.aadhaar_no) document.getElementById('aadhaarNo').value = d.aadhaar_no.replace(/\s+/g, '').slice(0, 12);
+        if(d.dob) {
+            if(d.dob.includes('/')) {
+                const parts = d.dob.split('/');
+                if(parts.length === 3) {
+                    document.getElementById('partyDob').value = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+                    calculateAgeFromDob();
+                }
+            } else if(d.dob.length === 4) {
+                document.getElementById('partyDob').value = `${d.dob}-01-01`;
+                calculateAgeFromDob();
+            }
+        }
+        if(d.age && !document.getElementById('partyAge').value) {
+            document.getElementById('partyAge').value = d.age;
+        }
+    }).catch(() => {
+        document.getElementById('afLoading').classList.add('d-none');
+        alert('आधार समोरील बाजू स्कॅन करता आली नाही.');
+    });
+}
+
+function scanAadhaarBack() {
+    let file = document.getElementById('aadhaarBackFile').files[0];
+    if(!file) return;
+    let formData = new FormData();
+    formData.append('file', file);
+
+    document.getElementById('abLoading').classList.remove('d-none');
+    fetch('/scan_aadhaar_back', { method: 'POST', body: formData })
+    .then(r => r.json())
+    .then(d => {
+        document.getElementById('abLoading').classList.add('d-none');
+        if(d.address) document.getElementById('partyAddress').value = d.address;
+    }).catch(() => {
+        document.getElementById('abLoading').classList.add('d-none');
+        alert('आधार मागील बाजू स्कॅन करता आली नाही.');
+    });
+}
+
+function scanPan() {
+    let file = document.getElementById('panFile').files[0];
+    if(!file) return;
+    let formData = new FormData();
+    formData.append('file', file);
+
+    document.getElementById('panLoading').classList.remove('d-none');
+    fetch('/scan_pan', { method: 'POST', body: formData })
+    .then(r => r.json())
+    .then(d => {
+        document.getElementById('panLoading').classList.add('d-none');
+        if(d.pan_no) document.getElementById('panNo').value = d.pan_no;
+    }).catch(() => {
+        document.getElementById('panLoading').classList.add('d-none');
+        alert('पॅन स्कॅन करता आले नाही.');
+    });
+}
+
+function addPartyToList() {
+    const name = document.getElementById('partyName').value.trim();
+    const age = document.getElementById('partyAge').value.trim();
+    const address = document.getElementById('partyAddress').value.trim();
+
+    if (!name) { alert('कृपया पक्षकाराचे पूर्ण नाव प्रविष्ट करा.'); return; }
+    if (!age) { alert('कृपया जन्मतारीख किंवा वय प्रविष्ट करा.'); return; }
+    if (!address) { alert('कृपया पत्ता प्रविष्ट करा.'); return; }
+
+    const party = {
+        party_type: document.getElementById('partyType').value,
+        party_name: name,
+        party_age: age,
+        party_dob: document.getElementById('partyDob').value || '',
+        party_gender: document.getElementById('partyGender').value,
+        aadhaar_no: document.getElementById('aadhaarNo').value.trim(),
+        pan_no: document.getElementById('panNo').value.trim(),
+        mobile_no: document.getElementById('partyMobile').value.trim(),
+        party_address: address
+    };
+
+    partyList.push(party);
+    renderPartyTable();
+    clearCurrentForm();
+}
+
+function renderPartyTable() {
+    const tbody = document.getElementById('partyTableBody');
+    if (partyList.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">कोणताही पक्षकार जोडलेला नाही.</td></tr>';
+        return;
+    }
+    tbody.innerHTML = '';
+    partyList.forEach((p, idx) => {
+        const badgeColor = p.party_type.includes('देणार') ? 'bg-primary' : 'bg-success';
+        tbody.innerHTML += `<tr>
+            <td>${idx + 1}</td>
+            <td><span class="badge ${badgeColor}">${p.party_type}</span></td>
+            <td><strong>${p.party_name}</strong></td>
+            <td>वय: ${p.party_age} वर्षे <br><small class="text-muted">${p.party_dob || ''}</small></td>
+            <td>पॅन: ${p.pan_no || 'नाही'}<br><small>मो: ${p.mobile_no || '-'}</small></td>
+            <td><small>${p.party_address}</small></td>
+            <td><button class="btn btn-sm btn-danger" onclick="deleteParty(${idx})">हटवा</button></td>
+        </tr>`;
+    });
+}
+
+function deleteParty(idx) {
+    partyList.splice(idx, 1);
+    renderPartyTable();
+}
+
+function clearCurrentForm() {
+    document.getElementById('partyName').value = '';
+    document.getElementById('partyDob').value = '';
+    document.getElementById('partyAge').value = '';
+    document.getElementById('aadhaarNo').value = '';
+    document.getElementById('panNo').value = '';
+    document.getElementById('partyMobile').value = '';
+    document.getElementById('partyAddress').value = '';
+}
+
+// मोबदला / भरणा तपशील फंक्शन्स
+function addPaymentRow() {
+    const mode = document.getElementById('payMode').value;
+    const amt = parseFloat(document.getElementById('payAmount').value) || 0;
+    const refNo = document.getElementById('payRefNo').value.trim();
+    const date = document.getElementById('payDate').value;
+    const details = document.getElementById('payDetails').value.trim();
+
+    if (amt <= 0) {
+        alert('कृपया वैध रक्कम प्रविष्ट करा.');
+        return;
+    }
+
+    paymentList.push({ mode, amount: amt, refNo, date, details });
+    renderPaymentTable();
+
+    document.getElementById('payAmount').value = '';
+    document.getElementById('payRefNo').value = '';
+    document.getElementById('payDetails').value = '';
+}
+
+function renderPaymentTable() {
+    const tbody = document.getElementById('paymentTableBody');
+    let total = 0;
+
+    if (paymentList.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">अद्याप कोणताही भरणा जोडलेला नाही.</td></tr>';
+        document.getElementById('lblTotalPaid').innerText = '0';
+        return;
+    }
+
+    tbody.innerHTML = '';
+    paymentList.forEach((pay, idx) => {
+        total += pay.amount;
+        tbody.innerHTML += `<tr>
+            <td>${idx + 1}</td>
+            <td><strong>${pay.mode}</strong></td>
+            <td class="text-success fw-bold">₹ ${pay.amount.toLocaleString('en-IN')}</td>
+            <td>${pay.refNo || '-'}</td>
+            <td>${pay.date || '-'}</td>
+            <td><small>${pay.details || '-'}</small></td>
+            <td><button class="btn btn-sm btn-danger" onclick="deletePayment(${idx})">हटवा</button></td>
+        </tr>`;
+    });
+    document.getElementById('lblTotalPaid').innerText = total.toLocaleString('en-IN');
+    document.getElementById('finalConsiderationAmt').value = total;
+}
+
+function deletePayment(idx) {
+    paymentList.splice(idx, 1);
+    renderPaymentTable();
+}
+
+function downloadWordFile() {
+    const hasSeller = partyList.some(p => p.party_type.includes('देणार'));
+    const hasPurchaser = partyList.some(p => p.party_type.includes('घेणार'));
+
+    if (partyList.length < 2 || !hasSeller || !hasPurchaser) {
+        alert("त्रुटी: दस्तामध्ये किमान दोन व्यक्ती (१ 'लिहून देणार' आणि १ 'लिहून घेणार') असणे अनिवार्य आहे.");
+        return;
+    }
+
+    document.getElementById('partiesDataInput').value = JSON.stringify(partyList);
+    document.getElementById('paymentsDataInput').value = JSON.stringify(paymentList);
+    document.getElementById('downloadForm').submit();
+}
+</script>
+</body>
+</html>

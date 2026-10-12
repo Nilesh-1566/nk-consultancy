@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NK CONSULTANCY - मालमत्तेची माहिती</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-navy: #0b2545;
+            --accent-gold: #c59b27;
+            --bg-light: #f4f6f9;
+        }
+        body {
+            background-color: var(--bg-light);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .top-navbar {
+            background: linear-gradient(135deg, #0b2545 0%, #13315c 100%);
+            padding: 15px 25px;
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border-bottom: 3px solid var(--accent-gold);
+        }
+        .logo-svg-container {
+            width: 58px;
+            height: 58px;
+            background: #ffffff;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 5px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.25);
+            border: 2px solid var(--accent-gold);
+            margin-right: 18px;
+        }
+        .brand-title {
+            font-size: 30px;
+            font-weight: 900;
+            letter-spacing: 1.5px;
+            color: #ffffff;
+            margin: 0;
+            line-height: 1.1;
+        }
+        .brand-subtitle {
+            font-size: 15px;
+            color: var(--accent-gold);
+            margin: 4px 0 0 0;
+            font-weight: 700;
+        }
+        .card-custom {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+            background: #ffffff;
+            margin-bottom: 25px;
+        }
+        .card-header-prop {
+            background: var(--primary-navy);
+            color: #ffffff;
+            font-weight: 700;
+            padding: 14px 20px;
+            font-size: 18px;
+            border-bottom: 2px solid var(--accent-gold);
+        }
+        .req { color: red; font-weight: bold; }
+        .table-custom th { background-color: var(--primary-navy); color: #ffffff; }
+        .ocr-upload-box {
+            background: #eaf2fb;
+            border: 2px dashed #0b2545;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .footer-bar {
+            text-align: center;
+            padding: 15px 0;
+            font-size: 14px;
+            color: #555;
+            background: #e9ecef;
+            border-top: 1px solid #dee2e6;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+
+<header class="top-navbar">
+    <div class="container-fluid d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+            <div class="logo-svg-container">
+                <svg viewBox="0 0 100 100" width="100%" height="100%">
+                    <circle cx="50" cy="50" r="46" fill="#0b2545" stroke="#c59b27" stroke-width="4"/>
+                    <rect x="30" y="24" width="40" height="52" rx="4" fill="#ffffff"/>
+                    <line x1="38" y1="35" x2="62" y2="35" stroke="#c59b27" stroke-width="3" stroke-linecap="round"/>
+                    <line x1="38" y1="45" x2="62" y2="45" stroke="#0b2545" stroke-width="2" stroke-linecap="round"/>
+                    <line x1="38" y1="54" x2="55" y2="54" stroke="#0b2545" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M62 60 L74 44 L67 38 L54 53 Z" fill="#c59b27"/>
+                    <circle cx="48" cy="63" r="6" fill="none" stroke="#c59b27" stroke-width="2"/>
+                </svg>
+            </div>
+            <div>
+                <h1 class="brand-title">NK CONSULTANCY</h1>
+                <p class="brand-subtitle">दस्त नोंदणी व प्रशासकीय सल्लागार सेवा</p>
+            </div>
+        </div>
+        <div>
+            <span class="badge bg-warning text-dark px-3 py-2 fs-6">
+                टोकन: <strong>{{ token_no or '33251261011' }}</strong>
+            </span>
+        </div>
+    </div>
+</header>
+
+<main class="container my-4">
+    <div class="card card-custom">
+        <div class="card-header-prop d-flex justify-content-between align-items-center">
+            <span><i class="fa fa-map-marked-alt me-2"></i>मालमत्तेची माहिती (Property Details)</span>
+            <small class="text-warning">दस्त शीर्षक: {{ article_desc or 'खरेदीखत' }}</small>
+        </div>
+        <div class="card-body p-4">
+
+            <!-- सातबारा अपलोड व ऑटो-स्कॅन विभाग -->
+            <div class="ocr-upload-box">
+                <h6 class="fw-bold text-navy mb-2"><i class="fa fa-file-invoice text-primary me-2"></i>७/१२ उतारा (Photo / PDF) अपलोड करा (Auto Fill)</h6>
+                <div class="row justify-content-center">
+                    <div class="col-md-6">
+                        <input type="file" id="satbaraFileInput" class="form-control" accept="image/*,application/pdf" onchange="uploadAndScanSatbara()">
+                    </div>
+                </div>
+                <small class="text-muted d-block mt-1">७/१२ उतारा निवडताच गाव, तालुका, जिल्हा, गट नंबर, एकूण क्षेत्र, आकार आपोआप फॉर्ममध्ये भरले जातील.</small>
+                <div id="satbaraLoading" class="mt-2 text-primary fw-bold d-none">
+                    <i class="fa fa-spinner fa-spin me-1"></i> सातबारा स्कॅन होत आहे, कृपया थांबा...
+                </div>
+            </div>
+
+            <!-- मालमत्ता तपशील फॉर्म -->
+            <div class="row g-3">
+                <!-- १. जिल्हा निवडा -->
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">जिल्हा <span class="req">*</span></label>
+                    <select id="propDistrict" class="form-select" onchange="onDistrictChange()" required>
+                        <option value="कोल्हापूर" selected>कोल्हापूर (Kolhapur)</option>
+                        <option value="सांगली">सांगली (Sangli)</option>
+                        <option value="सातारा">सातारा (Satara)</option>
+                        <option value="पुणे">पुणे (Pune)</option>
+                    </select>
+                </div>
+
+                <!-- २. तालुका निवडा -->
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">तालुका <span class="req">*</span></label>
+                    <select id="propTaluka" class="form-select" onchange="onTalukaChange()" required>
+                    </select>
+                </div>
+
+                <!-- ३. गाव निवडा -->
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">गाव <span class="req">*</span></label>
+                    <input list="villageList" id="propVillage" class="form-control" placeholder="गाव निवडा किंवा लिहा" oninput="updateDescriptionAuto()" required>
+                    <datalist id="villageList"></datalist>
+                </div>
+
+                <!-- क्षेत्र प्रकार आणि मालमत्ता प्रकार -->
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">क्षेत्र प्रकार</label>
+                    <select id="propAreaType" class="form-select">
+                        <option value="ग्रामीण" selected>ग्रामीण (Rural)</option>
+                        <option value="शहरी">शहरी (Urban)</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">मालमत्ता प्रकार</label>
+                    <select id="propType" class="form-select">
+                        <option value="Agricultral Land" selected>कृषी जमीन (Agricultural Land)</option>
+                        <option value="Residential Plot">निवासी भूखंड (Residential Plot)</option>
+                        <option value="Apartment/Flat/Room">फ्लॅट / सदनिका (Flat)</option>
+                        <option value="Shop">दुकान (Shop)</option>
+                        <option value="Office">कार्यालय (Office)</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">अँट्रीब्युट प्रकार</label>
+                    <select id="propAttrType" class="form-select" onchange="updateDescriptionAuto()">
+                        <option value="गट नंबर" selected>गट नंबर (Gat Number)</option>
+                        <option value="सर्वे नंबर">सर्वे नंबर (Survey Number)</option>
+                        <option value="सिटी सर्वे नंबर">सिटी सर्वे नंबर (CTS No)</option>
+                        <option value="प्लॉट नंबर">प्लॉट नंबर (Plot No)</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">गट / सर्वे क्रमांक <span class="req">*</span></label>
+                    <input type="text" id="propAttrNo" class="form-control" placeholder="उदा. १२२ किंवा २४०० अ" oninput="updateDescriptionAuto()" required>
+                </div>
+
+                <!-- सातबारा वरील एकूण क्षेत्र व आकार -->
+                <div class="col-md-3">
+                    <label class="form-label fw-bold text-success">७/१२ एकूण क्षेत्र (हे.आर.पा)</label>
+                    <input type="text" id="propTotalArea" class="form-control" value="0 हे 00 आर 00 पा" oninput="updateDescriptionAuto()">
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label fw-bold text-success">७/१२ पोटखराब (हे.आर.पा)</label>
+                    <input type="text" id="propPotkharaba" class="form-control" value="0 हे 00 आर 00 पा" oninput="updateDescriptionAuto()">
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label fw-bold text-success">७/१२ आकार (रु.पैसे)</label>
+                    <input type="text" id="propAakar" class="form-control" value="0 रुपये 00 पैसे" oninput="updateDescriptionAuto()">
+                </div>
+
+                <!-- लिहून देणार याचे क्षेत्रफळ (विक्री/बक्षीस क्षेत्र) -->
+                <div class="col-md-3">
+                    <label class="form-label fw-bold text-primary">लिहून देणार याचे क्षेत्रफळ *</label>
+                    <input type="text" id="propGivenArea" class="form-control" placeholder="उदा. 0 हे 21 आर 34 पा" oninput="updateDescriptionAuto()" required>
+                </div>
+
+                <!-- ऑटो-जनरेट होणारे कायदेशीर वर्णन -->
+                <div class="col-md-12">
+                    <label class="form-label fw-bold text-dark"><i class="fa fa-align-left me-1"></i>मिळकतीचे संपूर्ण कायदेशीर वर्णन (Auto-Generated):</label>
+                    <textarea id="propDescription" rows="4" class="form-control bg-light" style="font-size: 15px; line-height: 1.6;"></textarea>
+                </div>
+            </div>
+
+            <!-- Add / Save बटणे -->
+            <div class="text-end mt-4">
+                <button type="button" class="btn btn-outline-secondary px-3 me-2" onclick="clearPropForm()">क्लिअर (Clear)</button>
+                <button type="button" class="btn btn-primary px-4 fw-bold" onclick="addProperty()"><i class="fa fa-plus me-1"></i> Add / मालमत्ता जोडा</button>
+            </div>
+
+            <hr class="my-4">
+
+            <!-- जोडलेल्या मालमत्तांची तालिका (Grid) -->
+            <h5 class="fw-bold mb-3 text-dark">नोंदणी केलेल्या मालमत्तांची यादी (<span id="propCount">0</span>)</h5>
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped table-custom align-middle">
+                    <thead>
+                        <tr>
+                            <th style="width: 50px;">क्र.</th>
+                            <th>गाव / तालुका</th>
+                            <th>गट/सर्वे क्र.</th>
+                            <th>७/१२ एकूण क्षेत्र</th>
+                            <th>लिहून देणार याचे क्षेत्र</th>
+                            <th>मिळकतीचे संपूर्ण वर्णन</th>
+                            <th style="width: 80px;">कृती</th>
+                        </tr>
+                    </thead>
+                    <tbody id="propTableBody">
+                        <tr><td colspan="7" class="text-center text-muted">अद्याप कोणतीही मालमत्ता जोडलेली नाही. वरून माहिती जोडा.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- नेव्हिगेशन बटणे -->
+            <form action="/party_entry" method="GET" id="nextForm">
+                <input type="hidden" name="district" id="finalDistrict" value="{{ district }}">
+                <input type="hidden" name="taluka" id="finalTaluka" value="{{ taluka }}">
+                <input type="hidden" name="village" id="finalVillage" value="{{ village }}">
+                <input type="hidden" name="token_no" value="{{ token_no }}">
+                <input type="hidden" name="article" value="{{ article }}">
+                <input type="hidden" name="article_desc" value="{{ article_desc }}">
+                <input type="hidden" name="market_val" value="{{ market_val }}">
+                <input type="hidden" name="consideration_amt" value="{{ consideration_amt }}">
+                <input type="hidden" name="presentation_date" value="{{ presentation_date }}">
+                <input type="hidden" name="properties_data" id="propertiesDataInput">
+
+                <div class="d-flex justify-content-between mt-4 pt-3 border-top">
+                    <a href="javascript:history.back()" class="btn btn-warning px-4 fw-bold">
+                        <i class="fa fa-arrow-left me-2"></i>Previous / मागे
+                    </a>
+                    <button type="button" class="btn btn-success px-5 fw-bold" onclick="proceedToParty()">
+                        Next / पुढे <i class="fa fa-arrow-right ms-2"></i>
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</main>
+
+<footer class="footer-bar">
+    <div class="container">
+        <strong>NK CONSULTANCY</strong> &copy; 2026 | सर्व हक्क राखीव | दस्त नोंदणी ऑटोमेशन सेवा
+    </div>
+</footer>
+
+<script>
+// जिल्हा, तालुका आणि गावे डेटा मॅप
+const locData = {
+    "कोल्हापूर": {
+        "हातकणंगले": ["वाठार तर्फ उदगाव", "हातकणंगले", "इचलकरंजी", "आळते", "शिरोली", "हुपरी", "कोरोची", "रुई", "पट्टणकोडोली", "हेरले", "तारदाळ"],
+        "शिरोळ": ["शिरोळ", "जयसिंगपूर", "उदगाव", "कुरुंदवाड", "नृसिंहवाडी", "दानोळी", "अकिवाट"],
+        "करवीर": ["कोल्हापूर", "गांधीनगर", "पाचगाव", "उचगाव", "कळंबा", "वडणगे", "शिये"],
+        "कागल": ["कागल", "म्हाकवे", "मुरगूड", "सेनापती कापशी"]
+    },
+    "सांगली": {
+        "मिरज": ["मिरज", "सांगली", "कुपवाड"],
+        "वाळवा (इस्लामपूर)": ["इस्लामपूर", "कासेगाव", "वाळवा"]
+    },
+    "सातारा": {
+        "सातारा": ["सातारा", "शेंद्रे"],
+        "कराड": ["कराड", "मलकापूर"]
+    },
+    "पुणे": {
+        "हवेली": ["पुणे", "हडपसर"],
+        "पुणे शहर": ["शिवाजीनगर", "कोथरूड"]
+    }
+};
+
+let properties = [];
+
+// १. जिल्हा, तालुका व गाव निवड हाताळणे
+function onDistrictChange() {
+    const dist = document.getElementById("propDistrict").value;
+    const talukaSel = document.getElementById("propTaluka");
+    talukaSel.innerHTML = "";
+
+    const talukas = locData[dist] || { "इतर": ["इतर गाव"] };
+    for (let t in talukas) {
+        let opt = document.createElement("option");
+        opt.value = t;
+        opt.textContent = t;
+        talukaSel.appendChild(opt);
+    }
+    onTalukaChange();
+}
+
+function onTalukaChange() {
+    const dist = document.getElementById("propDistrict").value;
+    const taluka = document.getElementById("propTaluka").value;
+    const vList = document.getElementById("villageList");
+    const vInput = document.getElementById("propVillage");
+    vList.innerHTML = "";
+
+    if (locData[dist] && locData[dist][taluka]) {
+        locData[dist][taluka].forEach(v => {
+            let opt = document.createElement("option");
+            opt.value = v;
+            vList.appendChild(opt);
+        });
+        if (!vInput.value) {
+            vInput.value = locData[dist][taluka][0];
+        }
+    }
+    updateDescriptionAuto();
+}
+
+// २. सातबारा वरून ऑटोमॅटिक कायदेशीर मजकूर तयार करणे
+function updateDescriptionAuto() {
+    const village = document.getElementById('propVillage').value.trim() || 'आळते';
+    const attrType = document.getElementById('propAttrType').value || 'गट नंबर';
+    const attrNo = document.getElementById('propAttrNo').value.trim() || '___';
+    const totalArea = document.getElementById('propTotalArea').value.trim() || '0 हे 00 आर 00 पा';
+    const potkharaba = document.getElementById('propPotkharaba').value.trim() || '0 हे 00 आर 00 पा';
+    const aakar = document.getElementById('propAakar').value.trim() || '0 रुपये 00 पैसे';
+    const givenArea = document.getElementById('propGivenArea').value.trim() || '___';
+
+    const text = `${village} येथील ${attrType} ${attrNo} त्याचे सातबारा प्रमाणे एकूण क्षेत्र ${totalArea}, पोट खराब ${potkharaba}, आकार ${aakar} ची पुरे नंबर ची मिळकत असून त्यापैकी लिहून देणार यांचे मालकीचे एकूण क्षेत्र ${givenArea} ची मिळकत सर्व.`;
+    
+    document.getElementById('propDescription').value = text;
+}
+
+// ३. सातबारा फोटो/PDF अपलोड करून OCR द्वारे ऑटो-डिटेक्ट करणे
+function uploadAndScanSatbara() {
+    const fileInput = document.getElementById('satbaraFileInput');
+    if (!fileInput.files || fileInput.files.length === 0) return;
+
+    const file = fileInput.files[0];
+    const formData = new FormData();
+    formData.append('file', file);
+
+    document.getElementById('satbaraLoading').classList.remove('d-none');
+
+    fetch('/scan_satbara', {
+        method: 'POST',
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById('satbaraLoading').classList.add('d-none');
+        if (data.error) {
+            alert(data.error);
+            return;
+        }
+
+        // माहिती फॉर्ममध्ये ऑटो-अपडेट करणे
+        if (data.district) document.getElementById('propDistrict').value = data.district;
+        if (data.taluka) {
+            onDistrictChange();
+            document.getElementById('propTaluka').value = data.taluka;
+        }
+        if (data.village) document.getElementById('propVillage').value = data.village;
+        if (data.gat_no) document.getElementById('propAttrNo').value = data.gat_no;
+        if (data.total_area) document.getElementById('propTotalArea').value = data.total_area;
+        if (data.potkharaba) document.getElementById('propPotkharaba').value = data.potkharaba;
+        if (data.aakar) document.getElementById('propAakar').value = data.aakar;
+
+        updateDescriptionAuto();
+        alert('७/१२ उताऱ्यावरील माहिती यशस्वीरीत्या भरली गेली आहे!');
+    })
+    .catch(err => {
+        document.getElementById('satbaraLoading').classList.add('d-none');
+        console.error(err);
+        alert('७/१२ उतारा स्कॅन करताना त्रुटी आली. कृपया मॅन्युअली माहिती भरा.');
+    });
+}
+
+// ४. मालमत्ता ग्रिडमध्ये जोडणे
+function addProperty() {
+    const village = document.getElementById('propVillage').value.trim();
+    const attrNo = document.getElementById('propAttrNo').value.trim();
+    const givenArea = document.getElementById('propGivenArea').value.trim();
+    const desc = document.getElementById('propDescription').value.trim();
+
+    if (!attrNo || !givenArea) {
+        alert('कृपया गट नंबर आणि लिहून देणार याचे क्षेत्र भरा.');
+        return;
+    }
+
+    const item = {
+        district: document.getElementById('propDistrict').value,
+        taluka: document.getElementById('propTaluka').value,
+        village: village,
+        areaType: document.getElementById('propAreaType').value,
+        type: document.getElementById('propType').value,
+        attrType: document.getElementById('propAttrType').value,
+        attrNo: attrNo,
+        totalArea: document.getElementById('propTotalArea').value,
+        potkharaba: document.getElementById('propPotkharaba').value,
+        aakar: document.getElementById('propAakar').value,
+        givenArea: givenArea,
+        desc: desc
+    };
+
+    properties.push(item);
+    renderTable();
+    clearPropForm();
+}
+
+function renderTable() {
+    const tbody = document.getElementById('propTableBody');
+    document.getElementById('propCount').innerText = properties.length;
+
+    if (properties.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">अद्याप कोणतीही मालमत्ता जोडलेली नाही. वरून माहिती जोडा.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = '';
+    properties.forEach((p, index) => {
+        const tr = `<tr>
+            <td>${index + 1}</td>
+            <td>${p.village}, ${p.taluka}</td>
+            <td><strong>${p.attrType}: ${p.attrNo}</strong></td>
+            <td>${p.totalArea}</td>
+            <td class="text-primary fw-bold">${p.givenArea}</td>
+            <td><small>${p.desc}</small></td>
+            <td><button class="btn btn-sm btn-danger" onclick="deleteProperty(${index})">हटवा</button></td>
+        </tr>`;
+        tbody.innerHTML += tr;
+    });
+}
+
+function deleteProperty(index) {
+    properties.splice(index, 1);
+    renderTable();
+}
+
+function clearPropForm() {
+    document.getElementById('propAttrNo').value = '';
+    document.getElementById('propGivenArea').value = '';
+    updateDescriptionAuto();
+}
+
+function proceedToParty() {
+    if (properties.length === 0) {
+        let confirmProceed = confirm('तुम्ही कोणतीही मालमत्ता जोडलेली नाही. तरीही पुढे जायचे आहे का?');
+        if (!confirmProceed) return;
+    }
+
+    // शेवटचे निवडलेले गाव, तालुका, जिल्हा अपडेट करणे
+    document.getElementById('finalDistrict').value = document.getElementById('propDistrict').value;
+    document.getElementById('finalTaluka').value = document.getElementById('propTaluka').value;
+    document.getElementById('finalVillage').value = document.getElementById('propVillage').value;
+
+    document.getElementById('propertiesDataInput').value = JSON.stringify(properties);
+    document.getElementById('nextForm').submit();
+}
+
+// पेज उघडताना प्राथमिक डेटा सेट करणे
+window.onload = function() {
+    const initialDist = "{{ district }}" || "कोल्हापूर";
+    const initialTaluka = "{{ taluka }}" || "हातकणंगले";
+    const initialVillage = "{{ village }}" || "वाठार तर्फ उदगाव";
+
+    document.getElementById("propDistrict").value = initialDist;
+    onDistrictChange();
+    document.getElementById("propTaluka").value = initialTaluka;
+    document.getElementById("propVillage").value = initialVillage;
+    updateDescriptionAuto();
+};
+</script>
+</body>
+</html>
