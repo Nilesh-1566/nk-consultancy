@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>खरेदीपत्र प्रकार - NK Consultancy</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #f1f5f9; padding-bottom: 30px; }
+        .header {
+            background: linear-gradient(180deg, #090d16 0%, #172033 100%);
+            color: #d4af37;
+            padding: 50px 16px 20px;
+            text-align: center;
+            border-bottom: 3px solid #d4af37;
+        }
+        .header h1 { font-size: 22px; color: #f59e0b; }
+        .container { max-width: 600px; margin: 24px auto; padding: 0 16px; }
+        .btn-list { display: flex; flex-direction: column; gap: 14px; margin-top: 15px; }
+        .kharedi-btn {
+            display: flex;
+            align-items: center;
+            background: #ffffff;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 12px;
+            padding: 18px 16px;
+            text-decoration: none;
+            color: #0f172a;
+            font-size: 16px;
+            font-weight: 700;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.05);
+            transition: transform 0.1s ease;
+        }
+        .kharedi-btn:active { transform: scale(0.98); background-color: #f8fafc; }
+        .icon { font-size: 26px; margin-right: 14px; }
+        .back-btn {
+            display: block;
+            text-align: center;
+            margin-top: 25px;
+            padding: 12px;
+            background: #d4af37;
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>खरेदीपत्र प्रकार निवडा</h1>
+        <p style="color:#e2e8f0; font-size:13px; margin-top:4px;">NK CONSULTANCY</p>
+    </div>
+    <div class="container">
+        <div class="btn-list">
+            <a href="/draft_form?type=शेती खरेदीपत्र" class="kharedi-btn">
+                <span class="icon">🌾</span> १) शेती खरेदीपत्र
+            </a>
+            <a href="/draft_form?type=CTS खरेदीपत्र" class="kharedi-btn">
+                <span class="icon">🏙️</span> २) CTS खरेदीपत्र
+            </a>
+            <!-- ३) प्लॉट खरेदीपत्र -->
+            <a href="/plot_draft" class="kharedi-btn" style="border-color:#d4af37; background:#fffbeb;">
+                <span class="icon">🏡</span> ३) प्लॉट खरेदीपत्र (गुंठेवारी / रो-बंगलो)
+            </a>
+            <a href="/draft_form?type=करार TO खरेदीपत्र" class="kharedi-btn">
+                <span class="icon">📑</span> ४) करार TO खरेदीपत्र
+            </a>
+        </div>
+        <a href="/draft" class="back-btn">← दस्त मेनूवर परत जा</a>
+    </div>
+</body>
+</html>
