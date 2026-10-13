@@ -3,177 +3,176 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NK CONSULTANCY</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>NK Consultancy</title>
     <style>
-        body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, sans-serif; }
-        .top-navbar { background: linear-gradient(135deg, #0b2545 0%, #13315c 100%); padding: 15px 25px; color: white; border-bottom: 3px solid #c59b27; }
-        .logo-svg-container { width: 56px; height: 56px; background: white; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; padding: 4px; border: 2px solid #c59b27; margin-right: 15px; }
-        .brand-title { font-size: 28px; font-weight: 900; letter-spacing: 1px; color: #fff; margin: 0; }
-        .brand-subtitle { font-size: 14px; color: #c59b27; font-weight: 700; margin: 0; }
-        .card-custom { border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); background: white; border: none; margin-bottom: 20px; }
-        .card-header-new { background: #0b2545; color: white; font-weight: bold; padding: 12px 20px; border-radius: 10px 10px 0 0; }
-        .card-header-old { background: #47525e; color: white; font-weight: bold; padding: 12px 20px; border-radius: 10px 10px 0 0; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: #f4f6f9;
+            color: #333;
+            padding-bottom: 30px;
+        }
+        .header {
+            background: linear-gradient(135deg, #111827, #1f2937);
+            color: #d4af37;
+            padding: 24px 16px;
+            text-align: center;
+            border-bottom: 3px solid #d4af37;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        .header p {
+            font-size: 13px;
+            color: #e5e7eb;
+            margin-top: 4px;
+        }
+        .container {
+            max-width: 650px;
+            margin: 20px auto;
+            padding: 0 16px;
+        }
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 12px;
+            border-left: 4px solid #d4af37;
+            padding-left: 8px;
+        }
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+        .card-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 18px 12px;
+            text-decoration: none;
+            color: #1f2937;
+            font-size: 15px;
+            font-weight: 600;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: all 0.2s ease;
+        }
+        .card-btn:active {
+            transform: scale(0.97);
+            background-color: #f9fafb;
+        }
+        .card-btn .icon {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+        /* मुख्य सेवा - दस्त ड्राफ्ट */
+        .card-primary {
+            grid-column: span 2;
+            background: linear-gradient(135deg, #d4af37, #b8860b);
+            color: #ffffff;
+            border: none;
+            box-shadow: 0 4px 10px rgba(184, 134, 11, 0.3);
+        }
+        .card-primary .icon {
+            font-size: 32px;
+        }
+        .card-primary:active {
+            background: linear-gradient(135deg, #b8860b, #996515);
+        }
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
 
-<header class="top-navbar">
-    <div class="container-fluid d-flex justify-content-between align-items-center">
-        <div class="d-flex align-items-center">
-            <div class="logo-svg-container">
-                <svg viewBox="0 0 100 100" width="100%" height="100%">
-                    <circle cx="50" cy="50" r="46" fill="#0b2545" stroke="#c59b27" stroke-width="4"/>
-                    <rect x="30" y="24" width="40" height="52" rx="4" fill="#ffffff"/>
-                    <line x1="38" y1="35" x2="62" y2="35" stroke="#c59b27" stroke-width="3" stroke-linecap="round"/>
-                    <line x1="38" y1="45" x2="62" y2="45" stroke="#0b2545" stroke-width="2" stroke-linecap="round"/>
-                    <line x1="38" y1="54" x2="55" y2="54" stroke="#0b2545" stroke-width="2" stroke-linecap="round"/>
-                    <path d="M62 60 L74 44 L67 38 L54 53 Z" fill="#c59b27"/>
-                    <circle cx="48" cy="63" r="6" fill="none" stroke="#c59b27" stroke-width="2"/>
-                </svg>
-            </div>
-            <div>
-                <h1 class="brand-title">NK CONSULTANCY</h1>
-                <p class="brand-subtitle">दस्त नोंदणी व प्रशासकीय सल्लागार सेवा</p>
-            </div>
+    <div class="header">
+        <h1>NK CONSULTANCY</h1>
+        <p>दस्त नोंदणी व ऑनलाईन सेवा केंद्र</p>
+    </div>
+
+    <div class="container">
+        
+        <div class="section-title">मुख्य सेवा</div>
+        <div class="grid-container">
+            <!-- दस्त ड्राफ्ट बटन (आधीचे मुख्य टोकन पेज) -->
+            <a href="/draft" class="card-btn card-primary">
+                <span class="icon">📝</span>
+                <span>दस्त ड्राफ्ट</span>
+            </a>
         </div>
-        <div>
-            <a href="/" class="btn btn-outline-light btn-sm px-3">रिफ्रेश</a>
+
+        <div class="section-title">शासकीय व महसूल सेवा</div>
+        <div class="grid-container">
+            <!-- IGR Maharashtra -->
+            <a href="https://igrmaharashtra.gov.in/" target="_blank" class="card-btn">
+                <span class="icon">🏛️</span>
+                <span>IGR महाराष्ट्र</span>
+            </a>
+
+            <!-- सातबारा -->
+            <a href="https://bhulekh.mahabhumi.gov.in/" target="_blank" class="card-btn">
+                <span class="icon">📜</span>
+                <span>सातबारा (महाभूलेख)</span>
+            </a>
+
+            <!-- रेशनकार्ड -->
+            <a href="https://rcms.mahafood.gov.in/" target="_blank" class="card-btn">
+                <span class="icon">🌾</span>
+                <span>रेशनकार्ड</span>
+            </a>
+
+            <!-- ई चावडी -->
+            <a href="https://echawadi.mahabhumi.gov.in/" target="_blank" class="card-btn">
+                <span class="icon">🏠</span>
+                <span>ई चावडी</span>
+            </a>
+
+            <!-- ई रेकॉर्ड -->
+            <a href="https://aaplesarkar.mahaonline.gov.in/" target="_blank" class="card-btn">
+                <span class="icon">📁</span>
+                <span>ई रेकॉर्ड</span>
+            </a>
+
+            <!-- झोन दाखला -->
+            <a href="https://bpms.mahavastu.maharashtra.gov.in/" target="_blank" class="card-btn">
+                <span class="icon">🗺️</span>
+                <span>झोन दाखला</span>
+            </a>
+
+            <!-- भूमी अभिलेख -->
+            <a href="https://mahabhumi.gov.in/" target="_blank" class="card-btn">
+                <span class="icon">📐</span>
+                <span>भूमी अभिलेख</span>
+            </a>
+
+            <!-- संपर्क -->
+            <a href="/contact" class="card-btn">
+                <span class="icon">📞</span>
+                <span>संपर्क</span>
+            </a>
+        </div>
+
+        <div class="footer">
+            &copy; NK Consultancy | All Rights Reserved
         </div>
     </div>
-</header>
 
-<main class="container my-4">
-    <div class="row">
-        <div class="col-md-6">
-            <div class="card card-custom">
-                <div class="card-header-new">नवीन टोकन नोंद (New Token Entry)</div>
-                <div class="card-body p-4">
-                    <form action="/presentation" method="GET">
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">भाषा निवडा :</label>
-                            <select name="ddlLanguage" class="form-select">
-                                <option value="mr-IN" selected>मराठी</option>
-                                <option value="en-US">English</option>
-                            </select>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">जिल्हा निवडा : *</label>
-                            <select name="drpDistrictNew" id="distSelect" class="form-select" onchange="loadTalukas()" required>
-                                <option value="कोल्हापूर" selected>कोल्हापूर (Kolhapur)</option>
-                                <option value="सांगली">सांगली (Sangli)</option>
-                                <option value="सातारा">सातारा (Satara)</option>
-                                <option value="पुणे">पुणे (Pune)</option>
-                            </select>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">तालुका निवडा : *</label>
-                            <select name="drpTalukaNew" id="talukaSelect" class="form-select" onchange="loadVillages()" required>
-                            </select>
-                        </div>
-
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">गाव निवडा किंवा टाईप करा : *</label>
-                            <input list="villageList" name="txtVillageNew" id="villageInput" class="form-control" value="वाठार तर्फ उदगाव" required>
-                            <datalist id="villageList"></datalist>
-                        </div>
-
-                        <div class="d-flex justify-content-between">
-                            <button type="submit" class="btn btn-primary px-4 fw-bold">पुढे जा (Start)</button>
-                            <button type="reset" class="btn btn-secondary px-4">रद्द करा</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-6">
-            <div class="card card-custom">
-                <div class="card-header-old">जुनी टोकन माहिती (Old Token Information)</div>
-                <div class="card-body p-4">
-                    <button type="button" class="btn btn-warning w-100 fw-bold mb-3">सर्व टोकन माहिती दाखवा</button>
-                    <div class="row g-2 mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label small fw-bold">प्रारंभ तारीख :</label>
-                            <input type="date" class="form-control form-control-sm">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label small fw-bold">अंतिम तारीख :</label>
-                            <input type="date" class="form-control form-control-sm">
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold">प्रस्तुतकर्त्याचे नाव :</label>
-                        <input type="text" class="form-control form-control-sm" placeholder="नाव प्रविष्ट करा...">
-                    </div>
-                    <button type="button" class="btn btn-secondary btn-sm px-4">शोधा</button>
-                </div>
-            </div>
-        </div>
-    </div>
-</main>
-
-<script>
-const locData = {
-    "कोल्हापूर": {
-        "हातकणंगले": ["वाठार तर्फ उदगाव", "हातकणंगले", "इचलकरंजी", "शिरोली", "हुपरी", "कोरोची"],
-        "शिरोळ": ["शिरोळ", "जयसिंगपूर", "उदगाव", "कुरुंदवाड", "नृसिंहवाडी"],
-        "करवीर": ["कोल्हापूर", "गांधीनगर", "पाचगाव", "उचगाव"],
-        "कागल": ["कागल", "म्हाकवे", "मुरगूड"]
-    },
-    "सांगली": {
-        "मिरज": ["मिरज", "सांगली", "कुपवाड"],
-        "वाळवा (इस्लामपूर)": ["इस्लामपूर", "कासेगाव", "वाळवा"]
-    },
-    "सातारा": {
-        "सातारा": ["सातारा", "शेंद्रे"],
-        "कराड": ["कराड", "मलकापूर"]
-    },
-    "पुणे": {
-        "हवेली": ["पुणे", "हडपसर"],
-        "पुणे शहर": ["शिवाजीनगर", "कोथरूड"]
-    }
-};
-
-function loadTalukas() {
-    const dist = document.getElementById("distSelect").value;
-    const talukaSel = document.getElementById("talukaSelect");
-    talukaSel.innerHTML = "";
-
-    const talukas = locData[dist] || {};
-    for (let t in talukas) {
-        let opt = document.createElement("option");
-        opt.value = t;
-        opt.textContent = t;
-        talukaSel.appendChild(opt);
-    }
-    loadVillages();
-}
-
-function loadVillages() {
-    const dist = document.getElementById("distSelect").value;
-    const taluka = document.getElementById("talukaSelect").value;
-    const vList = document.getElementById("villageList");
-    const vInput = document.getElementById("villageInput");
-    vList.innerHTML = "";
-
-    if (locData[dist] && locData[dist][taluka]) {
-        locData[dist][taluka].forEach(v => {
-            let opt = document.createElement("option");
-            opt.value = v;
-            vList.appendChild(opt);
-        });
-        if(locData[dist][taluka].length > 0) {
-            vInput.value = locData[dist][taluka][0];
-        }
-    }
-}
-
-window.onload = function() {
-    loadTalukas();
-};
-</script>
 </body>
 </html>
