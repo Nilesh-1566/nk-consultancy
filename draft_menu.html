@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>दस्त प्रकार - NK Consultancy</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #f1f5f9; padding-bottom: 40px; }
+        
+        .header {
+            background: linear-gradient(180deg, #090d16 0%, #172033 100%);
+            color: #d4af37;
+            padding: 50px 16px 20px;
+            text-align: center;
+            border-bottom: 3px solid #d4af37;
+        }
+        .header h1 { font-size: 22px; color: #f59e0b; }
+        .header p { color: #f8fafc; font-size: 13px; margin-top: 4px; }
+
+        .container { max-width: 650px; margin: 20px auto; padding: 0 16px; }
+        
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 20px 0 10px 0;
+            border-left: 4px solid #d4af37;
+            padding-left: 8px;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .doc-btn {
+            display: flex;
+            align-items: center;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+            padding: 14px 12px;
+            text-decoration: none;
+            color: #0f172a;
+            font-size: 14.5px;
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+            transition: transform 0.1s ease;
+        }
+        .doc-btn:active {
+            transform: scale(0.97);
+            background-color: #f8fafc;
+        }
+        .icon { font-size: 22px; margin-right: 10px; }
+
+        .back-btn {
+            display: block;
+            text-align: center;
+            margin-top: 30px;
+            padding: 12px;
+            background: #d4af37;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>दस्त मसुदा (Drafting)</h1>
+        <p>खालीलपैकी दस्ताचा प्रकार निवडा</p>
+    </div>
+
+    <div class="container">
+
+        <!-- १. हस्तांतरण व मालकी हक्क दस्त -->
+        <div class="section-title">१. हस्तांतरण व मालकी हक्क दस्त</div>
+        <div class="grid-container">
+            <a href="/draft_form?type=खरेदीखत" class="doc-btn"><span class="icon">📜</span>खरेदीखत (Sale Deed)</a>
+            <a href="/draft_form?type=बक्षीसपत्र" class="doc-btn"><span class="icon">🎁</span>बक्षीसपत्र (Gift Deed)</a>
+            <a href="/draft_form?type=हक्कसोडपत्र" class="doc-btn"><span class="icon">🤝</span>हक्कसोडपत्र (Release Deed)</a>
+            <a href="/draft_form?type=वाटपपत्र" class="doc-btn"><span class="icon">⚖️</span>वाटपपत्र (Partition Deed)</a>
+            <a href="/draft_form?type=अदलाबदल दस्त" class="doc-btn"><span class="icon">🔄</span>अदलाबदल दस्त (Exchange)</a>
+            <a href="/draft_form?type=संमतीपत्र" class="doc-btn"><span class="icon">✍️</span>संमतीपत्र (Consent Deed)</a>
+        </div>
+
+        <!-- २. मुखत्यारपत्र -->
+        <div class="section-title">२. मुखत्यारपत्र (Power of Attorney)</div>
+        <div class="grid-container">
+            <a href="/draft_form?type=कुलमुखत्यारपत्र" class="doc-btn"><span class="icon">📑</span>कुलमुखत्यारपत्र (GPA)</a>
+            <a href="/draft_form?type=विशेष मुखत्यारपत्र" class="doc-btn"><span class="icon">📄</span>विशेष मुखत्यारपत्र (SPA)</a>
+            <a href="/draft_form?type=मुखत्यारपत्र रद्दबातल" class="doc-btn"><span class="icon">🚫</span>अधिकार रद्दबातल पत्र</a>
+        </div>
+
+        <!-- ३. तारण, कर्ज व वित्तीय दस्त -->
+        <div class="section-title">३. तारण, कर्ज व वित्तीय दस्त</div>
+        <div class="grid-container">
+            <a href="/draft_form?type=तारण गहाणखत" class="doc-btn"><span class="icon">🏦</span>तारण गहाणखत</a>
+            <a href="/draft_form?type=भोगवटा गहाणखत" class="doc-btn"><span class="icon">🏡</span>भोगवटा गहाणखत</a>
+            <a href="/draft_form?type=गहाण मुक्तीपत्र" class="doc-btn"><span class="icon">🔓</span>गहाण मुक्तीपत्र</a>
+            <a href="/draft_form?type=ठेव पावती दस्त" class="doc-btn"><span class="icon">🧾</span>ठेव पावती दस्त</a>
+        </div>
+
+        <!-- ४. भाडेतत्त्व व करार दस्त -->
+        <div class="section-title">४. भाडेतत्त्व व करार दस्त</div>
+        <div class="grid-container">
+            <a href="/draft_form?type=साठेखत / इसारपावती" class="doc-btn"><span class="icon">📝</span>इसारपावती / साठेखत</a>
+            <a href="/draft_form?type=कब्जा साठेखत" class="doc-btn"><span class="icon">🔑</span>कब्जा साठेखत</a>
+            <a href="/draft_form?type=भाडेकरार" class="doc-btn"><span class="icon">🏢</span>भाडेकरार (Rent Agreement)</a>
+            <a href="/draft_form?type=लिव्ह अँड लायसन्स" class="doc-btn"><span class="icon">📄</span>लिव्ह अँड लायसन्स</a>
+            <a href="/draft_form?type=दीर्घमुदतीचा पट्टा" class="doc-btn"><span class="icon">🗓️</span>दीर्घमुदतीचा पट्टा (Lease)</a>
+            <a href="/draft_form?type=पट्टा समाप्ती दस्त" class="doc-btn"><span class="icon">⏹️</span>पट्टा समाप्ती दस्त</a>
+        </div>
+
+        <!-- ५. वारसाहक्क व कुटुंबविषयक दस्त -->
+        <div class="section-title">५. वारसाहक्क व कुटुंबविषयक दस्त</div>
+        <div class="grid-container">
+            <a href="/draft_form?type=मृत्युपत्र" class="doc-btn"><span class="icon">📜</span>मृत्युपत्र (Will)</a>
+            <a href="/draft_form?type=मृत्युपत्र फेरफार पत्र" class="doc-btn"><span class="icon">✏️</span>मृत्युपत्र दुरुस्ती/फेरफार</a>
+            <a href="/draft_form?type=कौटुंबिक व्यवस्था पत्र" class="doc-btn"><span class="icon">👨‍👩‍👧‍👦</span>कौटुंबिक व्यवस्था पत्र</a>
+            <a href="/draft_form?type=दत्तकविधान पत्र" class="doc-btn"><span class="icon">👶</span>दत्तकविधान पत्र</a>
+        </div>
+
+        <!-- ६. दुरुस्ती व घोषणापत्र -->
+        <div class="section-title">६. दुरुस्ती व घोषणापत्र</div>
+        <div class="grid-container">
+            <a href="/draft_form?type=दुरुस्तीपत्र" class="doc-btn"><span class="icon">🛠️</span>दुरुस्तीपत्र (Correction)</a>
+            <a href="/draft_form?type=प्रतिज्ञापत्र / घोषणापत्र" class="doc-btn"><span class="icon">📋</span>प्रतिज्ञापत्र / घोषणापत्र</a>
+        </div>
+
+        <a href="/" class="back-btn">← मुख्य पानावर परत जा</a>
+    </div>
+
+</body>
+</html>
