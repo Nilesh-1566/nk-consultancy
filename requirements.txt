@@ -1,5 +1,5 @@
-Flask
+flask
 gunicorn
 python-docx
-pytesseract
+google-generativeai
 Pillow
