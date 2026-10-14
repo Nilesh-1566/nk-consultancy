@@ -1,11 +1,63 @@
 import io
+import json
 import os
 import urllib.parse
 from docx import Document
-from flask import Flask, redirect, render_template, request, send_file, url_for
+from flask import Flask, jsonify, redirect, render_template, request, send_file, url_for
+import google.generativeai as genai
+from PIL import Image
 
-# १. Flask ॲप सुरू करणे
 app = Flask(__name__)
+
+# तुमची Gemini API Key कॉन्फिगर केली आहे:
+GEMINI_API_KEY = (
+    "AQ.Ab8RN6Lco22TbaFTftpaNW4U6nra4zZSyDjRLEKOWOFIeMEHyQ"  # तुमची API Key
+)
+genai.configure(api_key=GEMINI_API_KEY)
+
+
+# १. AI द्वारे आधार / पॅन कार्ड स्कॅन करण्याचे Route
+@app.route('/scan_card_ai', methods=['POST'])
+def scan_card_ai():
+  try:
+    if 'card_files' not in request.files:
+      return jsonify({'error': 'कोणताही फोटो निवडलेला नाही'}), 400
+
+    files = request.files.getlist('card_files')
+    if not files or files[0].filename == '':
+      return jsonify({'error': 'फोटो फाईल रिकामी आहे'}), 400
+
+    images_payload = []
+    for f in files:
+      img = Image.open(f.stream)
+      images_payload.append(img)
+
+    # Gemini 1.5 Flash Vision Model
+    model = genai.GenerativeModel('gemini-1.5-flash')
+
+    prompt = """
+        या आधार कार्ड किंवा पॅन कार्डच्या फोटोंचे काळजीपूर्वक वाचन करा.
+        खालील माहिती अचूकपणे ओळखून फक्त वैध JSON फॉरमॅटमध्ये द्या:
+        {
+          "name": "व्यक्तीचे संपूर्ण नाव शुद्ध देवनागरी मराठीत (उदा. आनंदी पांडुरंग नामदे)",
+          "age": "व्यक्तीचे वय (उदा. वय 63 वर्ष, धंदा- घरकाम)",
+          "address": "आधार कार्डच्या मागील बाजूचा संपूर्ण पत्ता शुद्ध मराठीत पिनकोडसह (उदा. W/O: पांडुरंग भाऊ नामदे, नरंदे मार्ग, वठार तर्फ उदगांव, वडगाव, कोल्हापूर, महाराष्ट्र, पिन कोड- 416112)",
+          "aadhar": "12 अंकी आधार क्रमांक स्पेससह (उदा. xxxx xxxx xxxx)",
+          "pan": "10 अंकी इंग्रजी पॅन क्रमांक (पॅन कार्ड असल्यास)",
+          "mobile": "मोबाईल नंबर (कार्डवर आढळल्यास)"
+        }
+        महत्त्वाचे: फक्त आणि फक्त JSON आउटपुट द्या. इतर कोणताही मजकूर किंवा स्पष्टीकरण लिहू नका.
+        """
+
+    response = model.generate_content([prompt] + images_payload)
+    clean_text = (
+        response.text.replace('```json', '').replace('```', '').strip()
+    )
+    data = json.loads(clean_text)
+
+    return jsonify(data)
+  except Exception as e:
+    return jsonify({'error': str(e)}), 500
 
 
 # २. मुख्य होमपेज
@@ -14,13 +66,13 @@ def home():
   return render_template('home.html')
 
 
-# ३. दस्त मसुदा मुख्य मेनू
+# ३. दस्त मसुदा मेनू
 @app.route('/draft')
 def draft():
   return render_template('draft_menu.html')
 
 
-# ४. खरेदीखत उप-मेनू (शेती, CTS, प्लॉट, करार TO खरेदीखत)
+# ४. खरेदीखत उप-मेनू
 @app.route('/kharedi_menu')
 def kharedi_menu():
   return render_template('kharedi_menu.html')
@@ -32,25 +84,23 @@ def plot_draft():
   return render_template('plot_form.html')
 
 
-# ६. सामान्य फॉर्म उघडणे
+# ६. सामान्य फॉर्म
 @app.route('/draft_form')
 def draft_form():
   doc_type = request.args.get('type', '')
   return render_template('index.html', selected_type=doc_type)
 
 
-# ७. प्लॉट खरेदीपत्र Word (.docx) तयार करून डाऊनलोड करणे
+# ७. Word (.docx) दस्त निर्मिती
 @app.route('/generate_plot_docx', methods=['POST'])
 def generate_plot_docx():
   form = request.form
   doc = Document()
 
-  # दस्त शीर्षक
   p_title = doc.add_paragraph()
   p_title.alignment = 1
   p_title.add_run('|| श्री ||\n|| खरेदीपत्र ||\n').bold = True
 
-  # प्रास्ताविक माहिती
   intro = (
       f"तुकडी व जिल्हा {form.get('taluka_dist')} मधील {form.get('village')} या"
       ' गावाचे नगरपालिका हद्दीतील गुंठेवारी नियमितीकरण झालेल्या खुल्या प्लॉट'
@@ -61,7 +111,7 @@ def generate_plot_docx():
   )
   doc.add_paragraph(intro)
 
-  # १. लिहून घेणार (खरेदी घेणारा) तपशील
+  # लिहून घेणार
   g_names = form.getlist('ghenar_name[]')
   g_ages = form.getlist('ghenar_age_occ[]')
   g_addresses = form.getlist('ghenar_address[]')
@@ -80,7 +130,7 @@ def generate_plot_docx():
         f' {g_mobs[i] if i < len(g_mobs) else ""}\n\n'
     )
 
-  # २. लिहून देणार (खरेदी देणारा) तपशील
+  # लिहून देणार
   d_names = form.getlist('denar_name[]')
   d_ages = form.getlist('denar_age_occ[]')
   d_addresses = form.getlist('denar_address[]')
@@ -99,7 +149,7 @@ def generate_plot_docx():
         f' {d_mobs[i] if i < len(d_mobs) else ""}\n\n'
     )
 
-  # ३. संमती / मान्यता देणार (असल्यास)
+  # संमती देणार
   s_names = form.getlist('samati_name[]')
   s_ages = form.getlist('samati_age_occ[]')
   s_addresses = form.getlist('samati_address[]')
@@ -120,7 +170,6 @@ def generate_plot_docx():
             f' {s_mobs[i] if i < len(s_mobs) else ""}\n\n'
         )
 
-  # ४. मिळकतीचे वर्णन व कायदेशीर मजकूर
   milkat = (
       f'कारणे लिहून देतो खरेदीपत्र ऐसाजे की,\n'
       f'1) मिळकतीचे वर्णन:- \n'
@@ -149,7 +198,6 @@ def generate_plot_docx():
   )
   doc.add_paragraph(milkat)
 
-  # ५. भरणा तपशील यादी
   pay_amts = form.getlist('pay_amt[]')
   pay_modes = form.getlist('pay_mode[]')
   pay_banks = form.getlist('pay_bank[]')
@@ -170,12 +218,10 @@ def generate_plot_docx():
       f' असे सही ता. {form.get("doc_date")} इ.'
   )
 
-  # फाईल मेमरीमध्ये साठवून डाऊनलोड करणे
   target_stream = io.BytesIO()
   doc.save(target_stream)
   target_stream.seek(0)
 
-  # मोबाईलवर डाऊनलोड फेल होऊ नये म्हणून सुरक्षित नाव (ASCII Safe Name)
   gat_no_clean = (
       str(form.get('gat_no', '87')).replace('/', '_').replace(' ', '_')
   )
@@ -198,13 +244,12 @@ def generate_plot_docx():
   )
 
 
-# ८. IGR महाराष्ट्र माहिती पेज
+# ८. IGR व संपर्क Routes
 @app.route('/igr')
 def igr():
   return render_template('igr.html')
 
 
-# ९. संपर्क माहिती पेज
 @app.route('/contact')
 def contact():
   return render_template('contact.html')
