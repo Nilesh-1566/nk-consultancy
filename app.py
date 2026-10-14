@@ -1,37 +1,129 @@
-from flask import Flask, render_template, request, send_file, redirect, url_for
+from flask import Flask, render_template, request, send_file, jsonify, redirect, url_for
 from docx import Document
+from PIL import Image
 import os
 import io
+import json
+import base64
+import requests
+import urllib.parse
 
 app = Flask(__name__)
 
-# १. मुख्य होमपेज
+# १. Gemini API Key कॉन्फिगरेशन
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "AQ.Ab8RN6LqhXJUZBYHwOTyxDAeTHuGRfCbhk-YiPdeOlj62xdc7g")
+
+
+# २. थेट Google Gemini REST API द्वारे अचूक कार्ड वाचन
+@app.route('/scan_card_ai', methods=['POST'])
+def scan_card_ai():
+    try:
+        if 'card_files' not in request.files:
+            return jsonify({'error': 'कोणताही फोटो निवडलेला नाही'}), 400
+
+        files = request.files.getlist('card_files')
+        if not files or files[0].filename == '':
+            return jsonify({'error': 'फोटो फाईल रिकामी आहे'}), 400
+
+        # फोटोंना Base64 मध्ये रूपांतरित करणे
+        parts = []
+        for f in files:
+            img_bytes = f.read()
+            encoded_img = base64.b64encode(img_bytes).decode('utf-8')
+            parts.append({
+                "inline_data": {
+                    "mime_type": f.mimetype or "image/jpeg",
+                    "data": encoded_img
+                }
+            })
+
+        prompt_text = """
+        या आधार कार्ड किंवा पॅन कार्डच्या फोटोंचे काळजीपूर्वक वाचन करा.
+        खालील माहिती अचूकपणे ओळखून फक्त वैध JSON फॉरमॅटमध्ये द्या:
+        {
+          "name": "व्यक्तीचे मूळ संपूर्ण नाव शुद्ध देवनागरी मराठीत (उदा. आनंदी पांडुरंग नामदे)",
+          "age": "व्यक्तीचे वय वर्षामध्ये (उदा. वय 63 वर्ष, धंदा- घरकाम)",
+          "address": "आधार कार्डच्या मागील बाजूचा संपूर्ण पत्ता शुद्ध मराठीत पिनकोडसह (उदा. W/O: पांडुरंग भाऊ नामदे, नरंदे मार्ग, वठार तर्फ उदगांव, वडगाव, कोल्हापूर, महाराष्ट्र, पिन कोड- 416112)",
+          "aadhar": "12 अंकी आधार क्रमांक स्पेससह (उदा. xxxx xxxx xxxx)",
+          "pan": "10 अंकी इंग्रजी पॅन क्रमांक (पॅन कार्ड असल्यास)",
+          "mobile": "मोबाईल नंबर (कार्डवर आढळल्यास)"
+        }
+        महत्त्वाचे: फक्त आणि फक्त JSON आउटपुट द्या. इतर कोणताही मजकूर किंवा स्पष्टीकरण लिहू नका.
+        """
+        parts.append({"text": prompt_text})
+
+        headers = {'Content-Type': 'application/json'}
+        payload = {"contents": [{"parts": parts}]}
+
+        # Google Gemini सक्रिय मॉडेल्सची यादी (फॉलबॅकसह)
+        models_to_try = [
+            "gemini-2.0-flash",
+            "gemini-1.5-flash-8b",
+            "gemini-1.5-pro"
+        ]
+
+        api_res = None
+        last_error_text = ""
+
+        for model_name in models_to_try:
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={GEMINI_API_KEY}"
+            try:
+                res = requests.post(url, headers=headers, data=json.dumps(payload), timeout=40)
+                if res.status_code == 200:
+                    api_res = res
+                    break
+                else:
+                    last_error_text = res.text
+            except Exception as ex:
+                last_error_text = str(ex)
+                continue
+
+        if not api_res:
+            return jsonify({'error': f"Google AI कडून त्रुटी: {last_error_text}"}), 500
+
+        res_json = api_res.json()
+        raw_text = res_json['candidates'][0]['content']['parts'][0]['text']
+
+        clean_text = raw_text.replace('```json', '').replace('```', '').strip()
+        data = json.loads(clean_text)
+
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({'error': f"तांत्रिक त्रुटी: {str(e)}"}), 500
+
+
+# ३. मुख्य होमपेज
 @app.route('/')
 def home():
     return render_template('home.html')
 
-# २. दस्त मसुदा मेनू
+
+# ४. दस्त मसुदा मेनू
 @app.route('/draft')
 def draft():
     return render_template('draft_menu.html')
 
-# ३. खरेदीखत उप-मेनू
+
+# ५. खरेदीखत उप-मेनू
 @app.route('/kharedi_menu')
 def kharedi_menu():
     return render_template('kharedi_menu.html')
 
-# ४. प्लॉट खरेदीपत्र डेटा नोंदणी फॉर्म
+
+# ६. प्लॉट खरेदीपत्र डेटा नोंदणी फॉर्म
 @app.route('/plot_draft')
 def plot_draft():
     return render_template('plot_form.html')
 
-# ५. सामान्य फॉर्म
+
+# ७. सामान्य फॉर्म
 @app.route('/draft_form')
 def draft_form():
     doc_type = request.args.get('type', '')
     return render_template('index.html', selected_type=doc_type)
 
-# ६. Word (.docx) दस्त निर्मिती व डाऊनलोड
+
+# ८. Word (.docx) दस्त निर्मिती व डाऊनलोड
 @app.route('/generate_plot_docx', methods=['POST'])
 def generate_plot_docx():
     form = request.form
@@ -139,6 +231,7 @@ def generate_plot_docx():
         f"म्हणून स्वसंतोषाने व अक्कल हुशारीने लिहून दिले कायम खूष खरेदीपत्र असे सही ता. {form.get('doc_date')} इ."
     )
 
+    # Word फाईल तयार करून डाऊनलोड करणे
     target_stream = io.BytesIO()
     doc.save(target_stream)
     target_stream.seek(0)
@@ -156,14 +249,17 @@ def generate_plot_docx():
         mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     )
 
-# ७. IGR व संपर्क Routes
+
+# ९. IGR व संपर्क Routes
 @app.route('/igr')
 def igr():
     return render_template('igr.html')
 
+
 @app.route('/contact')
 def contact():
     return render_template('contact.html')
+
 
 if __name__ == '__main__':
     app.run(debug=True)
