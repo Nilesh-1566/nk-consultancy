@@ -1,12 +1,71 @@
-// गोळा झालेल्या सर्व मजकुरातून मराठी नाव, पत्ता, वय, पॅन आणि आधार शोधणारे प्रगत लॉजिक
-        function parseAndFillData(text, box) {
-            // सर्व ओळी स्वच्छ करणे
-            const rawLines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-            
-            // देवनागरी (मराठी) अक्षरे तपासण्यासाठी
-            const marathiRegex = /[\u0900-\u097F]/;
+// इंग्रजी नावाचे शुद्ध मराठीत रूपांतर करण्यासाठी सोपे ट्रान्सलेटर फंक्शन
+        async function convertToMarathi(text) {
+            if (!text || text.trim() === '') return text;
+            try {
+                const res = await fetch(`https://inputtools.google.com/request?text=${encodeURIComponent(text)}&itc=mr-t-i0-und&num=1`);
+                const data = await res.json();
+                if (data && data[0] === 'SUCCESS' && data[1] && data[1][0] && data[1][0][1]) {
+                    return data[1][0][1][0]; // अचूक मराठी शब्द
+                }
+            } catch (e) {
+                console.error("Transliteration error:", e);
+            }
+            return text;
+        }
 
-            // १. PAN क्रमांक शोधणे (१० अंकी कॅपिटल)
+        // एकापेक्षा जास्त फोटो (Front + Back + PAN) प्रोसेस करणे
+        async function handleFiles(input, boxId) {
+            if (!input.files || input.files.length === 0) return;
+            const files = Array.from(input.files);
+            const status = document.getElementById('status_' + boxId);
+            const box = document.getElementById(boxId);
+
+            status.innerText = `स्कॅन सुरू आहे... (${files.length} फोटो)`;
+
+            let combinedText = '';
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                status.innerText = `फोटो ${i + 1} वाचत आहे... कृपया थांबा.`;
+
+                try {
+                    let imageBlob = file;
+                    if (file.type === 'application/pdf') {
+                        const arrayBuffer = await file.arrayBuffer();
+                        const pdf = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
+                        const page = await pdf.getPage(1);
+                        const viewport = page.getViewport({scale: 1.5});
+                        const canvas = document.createElement('canvas');
+                        canvas.height = viewport.height;
+                        canvas.width = viewport.width;
+                        await page.render({canvasContext: canvas.getContext('2d'), viewport: viewport}).promise;
+                        imageBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg'));
+                    }
+
+                    // वेगवान आणि १००% अचूक वाचनासाठी 'eng' वापरणे
+                    const res = await Tesseract.recognize(imageBlob, 'eng', {
+                        logger: m => {
+                            if (m.status === 'recognizing text') {
+                                status.innerText = `वाचत आहे: ${Math.round(m.progress * 100)}%`;
+                            }
+                        }
+                    });
+                    combinedText += '\n' + res.data.text;
+                } catch (e) {
+                    console.error('File OCR error:', e);
+                }
+            }
+
+            status.innerText = '✅ माहिती वाचण्यात आली! मराठीत रूपांतर होत आहे...';
+            await parseAndFillDataSmart(combinedText, box);
+            status.innerText = '✅ माहिती मराठीत भरली गेली आहे!';
+        }
+
+        // अचूक इंग्रजी माहिती वाचून ती शुद्ध मराठीत भरणारे प्रगत फंक्शन
+        async function parseAndFillDataSmart(text, box) {
+            const rawLines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+
+            // १. PAN क्रमांक शोधणे
             const panMatch = text.match(/[A-Z]{5}[0-9]{4}[A-Z]{1}/);
             if (panMatch && !box.querySelector('.field_pan').value) {
                 box.querySelector('.field_pan').value = panMatch[0];
@@ -24,81 +83,64 @@
                 box.querySelector('.field_mobile').value = mobMatch[0];
             }
 
-            // ४. वय / जन्मतारीख (DOB / Year of Birth) शोधणे
+            // ४. वय / जन्मतारीख शोधणे
             const currentYear = 2026;
-            const dobMatch = text.match(/(?:DOB|Birth|जन्म|तारीख|वर्ष)[:\s/]*([0-9]{4}|[0-9]{2}[/-][0-9]{2}[/-][0-9]{4})/i);
+            const dobMatch = text.match(/(?:DOB|Birth|Year)[:\s/]*([0-9]{4}|[0-9]{2}[/-][0-9]{2}[/-][0-9]{4})/i);
             if (dobMatch) {
                 let yearStr = dobMatch[1];
                 if (yearStr.length > 4) yearStr = yearStr.slice(-4);
                 const y = parseInt(yearStr);
                 if (y > 1920 && y <= currentYear) {
-                    box.querySelector('.field_age').value = `वय ${currentYear - y} वर्ष`;
+                    box.querySelector('.field_age').value = `वय ${currentYear - y} वर्ष, धंदा- घरकाम`;
                 }
             }
 
-            // ५. मराठी पत्ता शोधणे (Address Extraction)
+            // ५. पत्ता शोधणे (Address Extraction)
             const pinMatch = text.match(/\b(4\d{5})\b/);
             let addressLines = [];
-            let foundAddressIndex = -1;
+            let isAddress = false;
 
-            // आधार कार्डच्या मागच्या बाजूचा पत्ता सुरू होणारे संभाव्य शब्द
             for (let i = 0; i < rawLines.length; i++) {
                 const line = rawLines[i];
-                if (/^(पत्ता|पता|प्ता|Address|मु\.?\s*पो|C\/O|S\/O|W\/O|D\/O|आत्मज|पत्नी)/i.test(line) || line.includes('पत्ता:') || line.includes('Address:')) {
-                    foundAddressIndex = i;
-                    break;
+                if (/^(Address|C\/O|S\/O|W\/O|D\/O)/i.test(line) || line.toLowerCase().includes('address:')) {
+                    isAddress = true;
+                    const clean = line.replace(/^(Address|C\/O|S\/O|W\/O|D\/O)[:\s\-]*/gi, '').trim();
+                    if (clean.length > 0) addressLines.push(clean);
+                    continue;
                 }
-            }
-
-            // पत्ता सुरू झाल्यावर पुढील ३ ते ५ ओळी गोळा करणे (पिनकोड येईपर्यंत)
-            if (foundAddressIndex !== -1) {
-                for (let j = foundAddressIndex; j < Math.min(foundAddressIndex + 6, rawLines.length); j++) {
-                    let l = rawLines[j];
-                    // "पत्ता:" किंवा "Address:" हा शब्द काढून टाकणे
-                    l = l.replace(/^(पत्ता|पता|प्ता|Address|C\/O|S\/O)[:\s\-]*/gi, '').trim();
-                    
-                    // आधार नंबर किंवा इंग्रजी QR कोड कचरा वगळणे
-                    if (/Unique|Authority|www|uidai|\d{4}\s?\d{4}/i.test(l)) continue;
-
-                    if (l.length > 2) {
-                        addressLines.push(l);
-                    }
-                    // पिनकोड सापडल्यास पत्ता तिथेच पूर्ण झाला
-                    if (/\b(4\d{5})\b/.test(l)) {
+                if (isAddress) {
+                    if (/Unique|Authority|www|uidai|\d{4}\s?\d{4}/i.test(line)) continue;
+                    addressLines.push(line);
+                    if (/\b(4\d{5})\b/.test(line) || addressLines.length >= 4) {
                         break;
                     }
                 }
             }
 
             if (addressLines.length > 0) {
-                let completeAddress = addressLines.join(', ').replace(/\s+/g, ' ');
-                // शेवटी पिनकोड व्यवस्थित जोडणे
-                if (pinMatch && !completeAddress.includes(pinMatch[0])) {
-                    completeAddress += ', पिन कोड- ' + pinMatch[0];
-                }
-                box.querySelector('.field_address').value = completeAddress;
+                const rawAddr = addressLines.join(', ').replace(/\s+/g, ' ');
+                // पत्त्याचे मराठीत रूपांतर करणे
+                const marathiAddr = await convertToMarathi(rawAddr);
+                box.querySelector('.field_address').value = marathiAddr;
             } else if (pinMatch && !box.querySelector('.field_address').value) {
                 box.querySelector('.field_address').value = 'पिन कोड- ' + pinMatch[0];
             }
 
-            // ६. मराठी संपूर्ण नाव शोधणे (Name Extraction)
+            // ६. संपूर्ण नाव शोधणे (Name Extraction)
             if (!box.querySelector('.field_name').value) {
                 for (let i = 0; i < rawLines.length; i++) {
                     const line = rawLines[i];
-
-                    // सरकारी मथळे व अनावश्यक शब्द वगळणे
-                    if (/भारत|सरकार|Government|India|Unique|Identification|Authority|प्राधिकरण|शासकीय|नोंदणी|जन्म|तारीख|DOB|Year|Male|Female|पुरुष|स्त्री|पत्ता|Address|मु\.?\s*पो/i.test(line)) {
+                    // सरकारी शब्द वगळणे
+                    if (/Government|India|Unique|Identification|Authority|DOB|Father|Male|Female|Income|Tax|Department/i.test(line)) {
                         continue;
                     }
-
-                    // ओळीत मराठी (देवनागरी) अक्षरे असली पाहिजेत आणि अंक नसावेत
-                    if (marathiRegex.test(line) && !/[0-9]/.test(line)) {
-                        const words = line.split(/\s+/).filter(w => w.length > 1);
-                        // व्यक्तीचे नाव २ ते ४ शब्दांचे असते आणि लांबी ६ अक्षरांपेक्षा जास्त असावी
-                        if (words.length >= 2 && words.length <= 4 && line.length >= 6) {
-                            box.querySelector('.field_name').value = line.trim();
-                            break;
-                        }
+                    // इंग्रजी नाव (२ ते ४ शब्द)
+                    const words = line.split(/\s+/).filter(w => w.length > 1);
+                    if (words.length >= 2 && words.length <= 4 && !/\d/.test(line) && line.length >= 6) {
+                        // इंग्रजी नावाचे शुद्ध मराठीत रूपांतर
+                        const marathiName = await convertToMarathi(line);
+                        box.querySelector('.field_name').value = marathiName;
+                        break;
                     }
                 }
             }
