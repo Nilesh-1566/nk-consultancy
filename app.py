@@ -14,7 +14,7 @@ GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "AQ.Ab8RN6LqhXJUZBYHwOTyxDAeTH
 client = genai.Client(api_key=GEMINI_API_KEY)
 
 
-# २. AI द्वारे आधार व पॅन कार्ड स्कॅन करण्याचे Route
+# २. AI द्वारे आधार व पॅन कार्ड स्कॅन करण्याचे Route (स्वयंचलित फॉलबॅकसह)
 @app.route('/scan_card_ai', methods=['POST'])
 def scan_card_ai():
     try:
@@ -44,11 +44,25 @@ def scan_card_ai():
         महत्त्वाचे: फक्त आणि फक्त JSON आउटपुट द्या. इतर कोणताही मजकूर किंवा स्पष्टीकरण लिहू नका.
         """
 
-        # अधिकृत gemini-3.8-flash मॉडेल वापरून थेट वाचन
-        response = client.models.generate_content(
-            model='gemini-3.8-flash',
-            contents=[prompt, *images_payload]
-        )
+        # एका मॉडेलवर जास्त ट्रॅफिक असल्यास दुसऱ्या मॉडेलचा स्वयंचलित वापर:
+        models_to_try = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-flash-latest']
+        response = None
+        last_err = None
+
+        for model_name in models_to_try:
+            try:
+                response = client.models.generate_content(
+                    model=model_name,
+                    contents=[prompt, *images_payload]
+                )
+                if response and response.text:
+                    break
+            except Exception as e:
+                last_err = e
+                continue
+
+        if not response or not response.text:
+            raise Exception(f"सर्व मॉडेल सध्या व्यस्त आहेत: {str(last_err)}")
 
         clean_text = response.text.replace('```json', '').replace('```', '').strip()
         data = json.loads(clean_text)
