@@ -9,14 +9,16 @@ from PIL import Image
 
 app = Flask(__name__)
 
-# तुमची Gemini API Key कॉन्फिगर केली आहे:
-GEMINI_API_KEY = (
-    "AQ.Ab8RN6Lco22TbaFTftpaNW4U6nra4zZSyDjRLEKOWOFIeMEHyQ"  # तुमची API Key
+# १. Gemini API Key कॉन्फिगरेशन (सुरक्षित पद्धत)
+# ही की तुम्ही थेट Render च्या Environment मध्ये टाकू शकता किंवा खालीलप्रमाणे वापरू शकता
+GEMINI_API_KEY = os.environ.get(
+    "GEMINI_API_KEY",
+    "AQ.Ab8RN6Lco22TbaFTftpaNW4U6nra4zZSyDjRLEKOWOFIeMEHyQ",
 )
 genai.configure(api_key=GEMINI_API_KEY)
 
 
-# १. AI द्वारे आधार / पॅन कार्ड स्कॅन करण्याचे Route
+# २. AI द्वारे आधार / पॅन कार्ड स्कॅन करण्याचे Route
 @app.route('/scan_card_ai', methods=['POST'])
 def scan_card_ai():
   try:
@@ -60,47 +62,49 @@ def scan_card_ai():
     return jsonify({'error': str(e)}), 500
 
 
-# २. मुख्य होमपेज
+# ३. मुख्य होमपेज
 @app.route('/')
 def home():
   return render_template('home.html')
 
 
-# ३. दस्त मसुदा मेनू
+# ४. दस्त मसुदा मेनू
 @app.route('/draft')
 def draft():
   return render_template('draft_menu.html')
 
 
-# ४. खरेदीखत उप-मेनू
+# ५. खरेदीखत उप-मेनू
 @app.route('/kharedi_menu')
 def kharedi_menu():
   return render_template('kharedi_menu.html')
 
 
-# ५. प्लॉट खरेदीपत्र डेटा नोंदणी फॉर्म
+# ६. प्लॉट खरेदीपत्र डेटा नोंदणी फॉर्म
 @app.route('/plot_draft')
 def plot_draft():
   return render_template('plot_form.html')
 
 
-# ६. सामान्य फॉर्म
+# ७. सामान्य फॉर्म
 @app.route('/draft_form')
 def draft_form():
   doc_type = request.args.get('type', '')
   return render_template('index.html', selected_type=doc_type)
 
 
-# ७. Word (.docx) दस्त निर्मिती
+# ८. Word (.docx) दस्त निर्मिती व डाऊनलोड
 @app.route('/generate_plot_docx', methods=['POST'])
 def generate_plot_docx():
   form = request.form
   doc = Document()
 
+  # दस्त शीर्षक
   p_title = doc.add_paragraph()
   p_title.alignment = 1
   p_title.add_run('|| श्री ||\n|| खरेदीपत्र ||\n').bold = True
 
+  # प्रास्ताविक माहिती
   intro = (
       f"तुकडी व जिल्हा {form.get('taluka_dist')} मधील {form.get('village')} या"
       ' गावाचे नगरपालिका हद्दीतील गुंठेवारी नियमितीकरण झालेल्या खुल्या प्लॉट'
@@ -111,7 +115,7 @@ def generate_plot_docx():
   )
   doc.add_paragraph(intro)
 
-  # लिहून घेणार
+  # लिहून घेणार तपशील
   g_names = form.getlist('ghenar_name[]')
   g_ages = form.getlist('ghenar_age_occ[]')
   g_addresses = form.getlist('ghenar_address[]')
@@ -130,7 +134,7 @@ def generate_plot_docx():
         f' {g_mobs[i] if i < len(g_mobs) else ""}\n\n'
     )
 
-  # लिहून देणार
+  # लिहून देणार तपशील
   d_names = form.getlist('denar_name[]')
   d_ages = form.getlist('denar_age_occ[]')
   d_addresses = form.getlist('denar_address[]')
@@ -149,7 +153,7 @@ def generate_plot_docx():
         f' {d_mobs[i] if i < len(d_mobs) else ""}\n\n'
     )
 
-  # संमती देणार
+  # संमती / मान्यता देणार (असल्यास)
   s_names = form.getlist('samati_name[]')
   s_ages = form.getlist('samati_age_occ[]')
   s_addresses = form.getlist('samati_address[]')
@@ -244,7 +248,7 @@ def generate_plot_docx():
   )
 
 
-# ८. IGR व संपर्क Routes
+# ९. IGR व संपर्क Routes
 @app.route('/igr')
 def igr():
   return render_template('igr.html')
