@@ -16,7 +16,7 @@ GEMINI_API_KEY = os.environ.get(
 )
 
 
-# २. थेट Python REST Request द्वारे AI कार्ड स्कॅनिंग
+# २. थेट Python REST Request द्वारे AI कार्ड स्कॅनिंग (स्वयंचलित मॉडेल फॉलबॅकसह)
 @app.route("/scan_card_ai", methods=["POST"])
 def scan_card_ai():
   try:
@@ -54,24 +54,38 @@ def scan_card_ai():
         """
     parts.append({"text": prompt_text})
 
-    # थेट Google Gemini REST API URL
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
     headers = {"Content-Type": "application/json"}
     payload = {"contents": [{"parts": parts}]}
 
-    # थेट HTTP POST विनंती
-    api_res = requests.post(
-        url, headers=headers, data=json.dumps(payload), timeout=35
-    )
+    # गुगलची सक्रिय मॉडेल्स एकामागून एक वापरणे (404 किंवा 503 एरर टाळण्यासाठी)
+    models_to_try = [
+        "gemini-2.5-flash",
+        "gemini-2.5-flash-lite",
+        "gemini-flash-latest",
+    ]
+    api_res = None
+    last_error_text = ""
 
-    if api_res.status_code != 200:
+    for model in models_to_try:
+      url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={GEMINI_API_KEY}"
+      try:
+        res = requests.post(
+            url, headers=headers, data=json.dumps(payload), timeout=35
+        )
+        if res.status_code == 200:
+          api_res = res
+          break
+        else:
+          last_error_text = res.text
+      except Exception as ex:
+        last_error_text = str(ex)
+        continue
+
+    if not api_res:
       return (
-          jsonify({
-              "error": (
-                  f"Google API कडून त्रुटी ({api_res.status_code}):"
-                  f" {api_res.text}"
-              )
-          }),
+          jsonify(
+              {"error": f"Google API कडून त्रुटी आली: {last_error_text}"}
+          ),
           500,
       )
 
