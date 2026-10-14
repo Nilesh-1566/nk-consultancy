@@ -1,330 +1,12 @@
-<!DOCTYPE html>
-<html lang="mr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>प्लॉट खरेदीपत्र मसुदा तयार करणे</title>
-    <!-- OCR व PDF वाचनासाठी आवश्यक लायब्ररी -->
-    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #f1f5f9; padding-bottom: 60px; }
-        .header { background: #090d16; color: #d4af37; padding: 42px 16px 20px; text-align: center; border-bottom: 3px solid #d4af37; }
-        .header h2 { font-size: 22px; color: #f59e0b; }
-        .container { max-width: 720px; margin: 20px auto; padding: 0 16px; }
-        .card { background: white; border-radius: 12px; padding: 18px; margin-bottom: 16px; border: 1px solid #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.04); }
-        h3 { font-size: 16px; color: #1e293b; margin-bottom: 12px; border-left: 4px solid #d4af37; padding-left: 8px; }
-        label { display: block; font-size: 13px; font-weight: 600; color: #475569; margin-top: 10px; margin-bottom: 3px; }
-        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; }
-        .party-box { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 16px; margin-bottom: 16px; position: relative; }
-        
-        .ocr-upload-box {
-            border: 2px dashed #0284c7;
-            background: #f0f9ff;
-            padding: 14px;
-            border-radius: 10px;
-            margin-bottom: 14px;
-            text-align: center;
-        }
-        .file-label {
-            display: inline-block;
-            background: #0284c7;
-            color: white;
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-size: 13px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 6px;
-        }
-        .status-ocr { font-size: 12.5px; color: #0369a1; margin-top: 6px; font-weight: 600; }
-        .btn-add { background: #0f766e; color: white; border: none; padding: 9px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 6px; }
-        .btn-remove { background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 5px; font-size: 12px; float: right; cursor: pointer; }
-        .submit-btn { width: 100%; background: linear-gradient(135deg, #d4af37, #b8860b); color: white; border: none; padding: 15px; font-size: 16px; font-weight: bold; border-radius: 10px; margin-top: 25px; cursor: pointer; box-shadow: 0 4px 10px rgba(184, 134, 11, 0.35); }
-    </style>
-</head>
-<body>
-
-    <div class="header">
-        <h2>प्लॉट खरेदीपत्र मसुदा</h2>
-        <p style="font-size:13px; color:#cbd5e1; margin-top:4px;">NK CONSULTANCY दस्त नोंदणी प्रणाली</p>
-    </div>
-
-    <div class="container">
-        <form action="/generate_plot_docx" method="POST">
-
-            <!-- १. प्राथमिक माहिती -->
-            <div class="card">
-                <h3>१. दस्त प्राथमिक तपशील</h3>
-                <label>दस्त दिनांक:</label>
-                <input type="text" name="doc_date" value="23/01/2025" required>
-
-                <label>गाव:</label>
-                <input type="text" name="village" value="पेठ वडगाव" required>
-
-                <label>तालुका व जिल्हा:</label>
-                <input type="text" name="taluka_dist" value="ता. हातकणंगले, जि. कोल्हापूर" required>
-
-                <label>खरेदी रक्कम (अंकी रु.):</label>
-                <input type="text" name="amount_num" value="32,00,000/-" required>
-
-                <label>रक्कम अक्षरी:</label>
-                <input type="text" name="amount_words" value="बत्तीस लाख फक्त" required>
-
-                <label>रेडी रेकनर दर (प्रती चौ.मी.):</label>
-                <input type="text" name="rate_sqm" value="2140/-">
-            </div>
-
-            <!-- २. लिहून घेणार (खरेदी घेणारा) -->
-            <div class="card">
-                <h3>२. लिहून घेणार (खरेदी घेणारा)</h3>
-                <div id="ghenar_container">
-                    <div class="party-box" id="ghenar_0">
-                        <div class="ocr-upload-box">
-                            <span style="font-size:13px; font-weight:bold; color:#0369a1;">📷 आधार (दोन्ही बाजू) किंवा पॅन कार्ड अपलोड करा</span><br>
-                            <span style="font-size:11.5px; color:#64748b;">(एकाच वेळी २-३ फोटो किंवा PDF निवडा)</span><br>
-                            <input type="file" id="file_ghenar_0" accept="image/*,.pdf" multiple style="display:none;" onchange="handleFiles(this, 'ghenar_0')">
-                            <label for="file_ghenar_0" class="file-label">कार्ड निवडा / फोटो काढा</label>
-                            <div class="status-ocr" id="status_ghenar_0"></div>
-                        </div>
-
-                        <label>संपूर्ण नाव (मराठीत):</label>
-                        <input type="text" name="ghenar_name[]" class="field_name" required>
-
-                        <label>वय व धंदा:</label>
-                        <input type="text" name="ghenar_age_occ[]" class="field_age" placeholder="वय -- वर्ष, धंदा- घरकाम">
-
-                        <label>पत्ता व पिनकोड (मराठीत):</label>
-                        <textarea name="ghenar_address[]" class="field_address" rows="2" placeholder="रा. --, ता. --, जि. --, पिन कोड- --"></textarea>
-
-                        <label>आधार क्रमांक:</label>
-                        <input type="text" name="ghenar_aadhar[]" class="field_aadhar" placeholder="xxxx xxxx xxxx">
-
-                        <label>पॅन नंबर:</label>
-                        <input type="text" name="ghenar_pan[]" class="field_pan" placeholder="PAN Number">
-
-                        <label>मोबाईल नंबर:</label>
-                        <input type="text" name="ghenar_mobile[]" class="field_mobile" placeholder="मोबाईल नंबर">
-                    </div>
-                </div>
-                <button type="button" class="btn-add" onclick="addParty('ghenar')">+ आणखी लिहून घेणार जोडा</button>
-            </div>
-
-            <!-- ३. लिहून देणार (खरेदी देणारा) -->
-            <div class="card">
-                <h3>३. लिहून देणार (खरेदी देणारा)</h3>
-                <div id="denar_container">
-                    <div class="party-box" id="denar_0">
-                        <div class="ocr-upload-box">
-                            <span style="font-size:13px; font-weight:bold; color:#0369a1;">📷 आधार (दोन्ही बाजू) किंवा पॅन कार्ड अपलोड करा</span><br>
-                            <span style="font-size:11.5px; color:#64748b;">(एकाच वेळी २-३ फोटो किंवा PDF निवडा)</span><br>
-                            <input type="file" id="file_denar_0" accept="image/*,.pdf" multiple style="display:none;" onchange="handleFiles(this, 'denar_0')">
-                            <label for="file_denar_0" class="file-label">कार्ड निवडा / फोटो काढा</label>
-                            <div class="status-ocr" id="status_denar_0"></div>
-                        </div>
-
-                        <label>संपूर्ण नाव (मराठीत):</label>
-                        <input type="text" name="denar_name[]" class="field_name" required>
-
-                        <label>वय व धंदा:</label>
-                        <input type="text" name="denar_age_occ[]" class="field_age" placeholder="वय -- वर्ष, धंदा- व्यवसाय">
-
-                        <label>पत्ता व पिनकोड (मराठीत):</label>
-                        <textarea name="denar_address[]" class="field_address" rows="2" placeholder="रा. --, ता. --, जि. --, पिन कोड- --"></textarea>
-
-                        <label>आधार क्रमांक:</label>
-                        <input type="text" name="denar_aadhar[]" class="field_aadhar" placeholder="xxxx xxxx xxxx">
-
-                        <label>पॅन नंबर:</label>
-                        <input type="text" name="denar_pan[]" class="field_pan" placeholder="PAN Number">
-
-                        <label>मोबाईल नंबर:</label>
-                        <input type="text" name="denar_mobile[]" class="field_mobile" placeholder="मोबाईल नंबर">
-                    </div>
-                </div>
-                <button type="button" class="btn-add" onclick="addParty('denar')">+ आणखी लिहून देणार जोडा</button>
-            </div>
-
-            <!-- ४. संमती / मान्यता देणार -->
-            <div class="card">
-                <h3>४. संमती देणार / मान्यता देणार (असल्यास)</h3>
-                <div id="samati_container"></div>
-                <button type="button" class="btn-add" onclick="addParty('samati')">+ संमती/मान्यता देणार जोडा</button>
-            </div>
-
-            <!-- ५. मिळकतीचे वर्णन व क्षेत्र -->
-            <div class="card">
-                <h3>५. मिळकतीचे वर्णन व क्षेत्र</h3>
-                <label>गट / सर्व्हे नंबर:</label>
-                <input type="text" name="gat_no" value="87/3" required>
-
-                <label>प्लॉट नंबर:</label>
-                <input type="text" name="plot_no" value="26-सी" required>
-
-                <label>क्षेत्रफळाचे एकक निवडा:</label>
-                <select id="area_unit" name="area_unit" onchange="formatArea()">
-                    <option value="he_r">हेक्टर-आर (उदा. 0.0000)</option>
-                    <option value="sqm">चौरस मीटर (उदा. 0.0)</option>
-                </select>
-
-                <label>एकूण क्षेत्रफळ (फक्त नंबर टाका):</label>
-                <input type="text" id="raw_area" placeholder="उदा. 1.49 किंवा 65.36" oninput="formatArea()">
-                <input type="hidden" id="final_area" name="final_area">
-                <div id="area_preview" style="font-size:13px; color:#0f766e; margin-top:4px; font-weight:bold;"></div>
-
-                <label>बांधकाम क्षेत्र (चौ. फूट):</label>
-                <input type="text" name="const_area" value="1059.60 चौरस फुट">
-
-                <label>पूर्वेस:</label>
-                <input type="text" name="east" value="भूखंड नंबर 29 व 28 ची मिळकत">
-                <label>पश्चिमेस:</label>
-                <input type="text" name="west" value="जाणे येणेसाठी सोडलेला 5.5 मीटर रुंदीचा रस्ता">
-                <label>दक्षिणेस:</label>
-                <input type="text" name="south" value="रो बंगलो नंबर 27 ची मिळकत">
-                <label>उत्तरेस:</label>
-                <input type="text" name="north" value="रो बंगलो नंबर 26 B ची मिळकत">
-            </div>
-
-            <!-- ६. भरणा तपशील -->
-            <div class="card">
-                <h3>६. भरणा तपशील (Payment Details)</h3>
-                <div id="payment_container">
-                    <div class="party-box" id="pay_0">
-                        <label>रक्कम रु.:</label>
-                        <input type="text" name="pay_amt[]" placeholder="उदा. 3,20,000/-" required>
-                        <label>माध्यम (चेक/DD/RTGS):</label>
-                        <input type="text" name="pay_mode[]" placeholder="चेक नंबर 869909 / DD नंबर">
-                        <label>बँक व शाखा नाव:</label>
-                        <input type="text" name="pay_bank[]" placeholder="स्टेट बँक ऑफ इंडिया, शाखा पेठ वडगाव">
-                    </div>
-                </div>
-                <button type="button" class="btn-add" onclick="addPayment()">+ आणखी भरणा नोंद जोडा</button>
-            </div>
-
-            <button type="submit" class="submit-btn">📥 Word (.docx) दस्त डाउनलोड करा</button>
-        </form>
-    </div>
-
-    <script>
-        let counter = 1;
-
-        function addParty(type) {
-            const id = type + '_' + counter++;
-            const container = document.getElementById(type + '_container');
-            const div = document.createElement('div');
-            div.className = 'party-box';
-            div.id = id;
-            div.innerHTML = `
-                <button type="button" class="btn-remove" onclick="document.getElementById('${id}').remove()">काढून टाका ✕</button>
-                <div class="ocr-upload-box">
-                    <span style="font-size:13px; font-weight:bold; color:#0369a1;">📷 आधार (दोन्ही बाजू) किंवा पॅन कार्ड अपलोड करा</span><br>
-                    <input type="file" id="file_${id}" accept="image/*,.pdf" multiple style="display:none;" onchange="handleFiles(this, '${id}')">
-                    <label for="file_${id}" class="file-label">कार्ड निवडा / फोटो काढा</label>
-                    <div class="status-ocr" id="status_${id}"></div>
-                </div>
-                <label>संपूर्ण नाव (मराठीत):</label>
-                <input type="text" name="${type}_name[]" class="field_name" required>
-                <label>वय व धंदा:</label>
-                <input type="text" name="${type}_age_occ[]" class="field_age" placeholder="वय -- वर्ष, धंदा- --">
-                <label>पत्ता व पिनकोड (मराठीत):</label>
-                <textarea name="${type}_address[]" class="field_address" rows="2" placeholder="रा. --, पिन कोड- --"></textarea>
-                <label>आधार क्रमांक:</label>
-                <input type="text" name="${type}_aadhar[]" class="field_aadhar" placeholder="xxxx xxxx xxxx">
-                <label>पॅन नंबर:</label>
-                <input type="text" name="${type}_pan[]" class="field_pan">
-                <label>मोबाईल नंबर:</label>
-                <input type="text" name="${type}_mobile[]" class="field_mobile">
-            `;
-            container.appendChild(div);
-        }
-
-        function addPayment() {
-            const id = 'pay_' + counter++;
-            const container = document.getElementById('payment_container');
-            const div = document.createElement('div');
-            div.className = 'party-box';
-            div.id = id;
-            div.innerHTML = `
-                <button type="button" class="btn-remove" onclick="document.getElementById('${id}').remove()">काढून टाका ✕</button>
-                <label>रक्कम रु.:</label>
-                <input type="text" name="pay_amt[]" placeholder="उदा. 5,00,000/-" required>
-                <label>माध्यम (चेक/DD/RTGS):</label>
-                <input type="text" name="pay_mode[]" placeholder="चेक / DD क्रमांक">
-                <label>बँक व शाखा नाव:</label>
-                <input type="text" name="pay_bank[]" placeholder="बँकेचे नाव व शाखा">
-            `;
-            container.appendChild(div);
-        }
-
-        function formatArea() {
-            const unit = document.getElementById('area_unit').value;
-            const val = parseFloat(document.getElementById('raw_area').value) || 0;
-            let formatted = '';
-            if (unit === 'he_r') {
-                formatted = val.toFixed(4) + ' हेक्टर-आर';
-            } else {
-                formatted = val.toFixed(1) + ' चौरस मीटर';
-            }
-            document.getElementById('final_area').value = formatted;
-            document.getElementById('area_preview').innerText = 'दस्त मसुद्यात नोंद: ' + formatted;
-        }
-
-        // एकापेक्षा जास्त फोटो (Front + Back + PAN) प्रोसेस करणे
-        async function handleFiles(input, boxId) {
-            if (!input.files || input.files.length === 0) return;
-            const files = Array.from(input.files);
-            const status = document.getElementById('status_' + boxId);
-            const box = document.getElementById(boxId);
-
-            status.innerText = `स्कॅन सुरू आहे... (${files.length} फोटो)`;
-
-            let combinedText = '';
-
-            for (let i = 0; i < files.length; i++) {
-                const file = files[i];
-                status.innerText = `फोटो ${i + 1} वाचत आहे... कृपया थांबा.`;
-
-                try {
-                    let imageBlob = file;
-                    if (file.type === 'application/pdf') {
-                        const arrayBuffer = await file.arrayBuffer();
-                        const pdf = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
-                        const page = await pdf.getPage(1);
-                        const viewport = page.getViewport({scale: 1.5});
-                        const canvas = document.createElement('canvas');
-                        canvas.height = viewport.height;
-                        canvas.width = viewport.width;
-                        await page.render({canvasContext: canvas.getContext('2d'), viewport: viewport}).promise;
-                        imageBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg'));
-                    }
-
-                    // मराठी (mar) + इंग्रजी (eng) दोन्ही भाषा ओळखणे
-                    const res = await Tesseract.recognize(imageBlob, 'mar+eng', {
-                        logger: m => {
-                            if (m.status === 'recognizing text') {
-                                status.innerText = `मराठी मजकूर वाचत आहे: ${Math.round(m.progress * 100)}%`;
-                            }
-                        }
-                    });
-                    combinedText += '\n' + res.data.text;
-                } catch (e) {
-                    console.error('File OCR error:', e);
-                }
-            }
-
-            status.innerText = '✅ माहिती वाचण्यात आली! मराठी मजकूर भरत आहे...';
-            parseAndFillData(combinedText, box);
-        }
-
-        // गोळा झालेल्या मजकुरातून मराठी नाव, मराठी पत्ता, वय, पॅन आणि आधार शोधणे
+// गोळा झालेल्या सर्व मजकुरातून मराठी नाव, पत्ता, वय, पॅन आणि आधार शोधणारे प्रगत लॉजिक
         function parseAndFillData(text, box) {
-            const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-
-            // देवनागरी (मराठी) अक्षरे तपासण्यासाठी रेग्युलर एक्स्प्रेशन
+            // सर्व ओळी स्वच्छ करणे
+            const rawLines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+            
+            // देवनागरी (मराठी) अक्षरे तपासण्यासाठी
             const marathiRegex = /[\u0900-\u097F]/;
 
-            // १. PAN क्रमांक शोधणे (इंग्रजी)
+            // १. PAN क्रमांक शोधणे (१० अंकी कॅपिटल)
             const panMatch = text.match(/[A-Z]{5}[0-9]{4}[A-Z]{1}/);
             if (panMatch && !box.querySelector('.field_pan').value) {
                 box.querySelector('.field_pan').value = panMatch[0];
@@ -342,7 +24,7 @@
                 box.querySelector('.field_mobile').value = mobMatch[0];
             }
 
-            // ४. वय / जन्मतारीख शोधणे
+            // ४. वय / जन्मतारीख (DOB / Year of Birth) शोधणे
             const currentYear = 2026;
             const dobMatch = text.match(/(?:DOB|Birth|जन्म|तारीख|वर्ष)[:\s/]*([0-9]{4}|[0-9]{2}[/-][0-9]{2}[/-][0-9]{4})/i);
             if (dobMatch) {
@@ -354,59 +36,66 @@
                 }
             }
 
-            // ५. मराठी पत्ता शोधणे (आधारच्या मागच्या बाजूवरील "पत्ता:" किंवा "मु. पो.")
-            let marathiAddressLines = [];
-            let addressStart = false;
+            // ५. मराठी पत्ता शोधणे (Address Extraction)
+            const pinMatch = text.match(/\b(4\d{5})\b/);
+            let addressLines = [];
+            let foundAddressIndex = -1;
 
-            for (let i = 0; i < lines.length; i++) {
-                const line = lines[i];
-
-                // पत्ता सुरू होण्याची खूण
-                if (/^(पत्ता|मु\.?\s*पो|रा\.|Address)/i.test(line) || line.includes('पत्ता:')) {
-                    addressStart = true;
-                    const cleanLine = line.replace(/^(पत्ता|Address)[:\s]*/gi, '');
-                    if (cleanLine.length > 0) marathiAddressLines.push(cleanLine);
-                    continue;
+            // आधार कार्डच्या मागच्या बाजूचा पत्ता सुरू होणारे संभाव्य शब्द
+            for (let i = 0; i < rawLines.length; i++) {
+                const line = rawLines[i];
+                if (/^(पत्ता|पता|प्ता|Address|मु\.?\s*पो|C\/O|S\/O|W\/O|D\/O|आत्मज|पत्नी)/i.test(line) || line.includes('पत्ता:') || line.includes('Address:')) {
+                    foundAddressIndex = i;
+                    break;
                 }
+            }
 
-                // पत्ता सुरू झाल्यानंतरच्या ओळी गोळा करणे
-                if (addressStart) {
-                    if (line.match(/\b(4\d{5})\b/) || marathiAddressLines.length >= 4) {
-                        marathiAddressLines.push(line);
-                        break;
+            // पत्ता सुरू झाल्यावर पुढील ३ ते ५ ओळी गोळा करणे (पिनकोड येईपर्यंत)
+            if (foundAddressIndex !== -1) {
+                for (let j = foundAddressIndex; j < Math.min(foundAddressIndex + 6, rawLines.length); j++) {
+                    let l = rawLines[j];
+                    // "पत्ता:" किंवा "Address:" हा शब्द काढून टाकणे
+                    l = l.replace(/^(पत्ता|पता|प्ता|Address|C\/O|S\/O)[:\s\-]*/gi, '').trim();
+                    
+                    // आधार नंबर किंवा इंग्रजी QR कोड कचरा वगळणे
+                    if (/Unique|Authority|www|uidai|\d{4}\s?\d{4}/i.test(l)) continue;
+
+                    if (l.length > 2) {
+                        addressLines.push(l);
                     }
-                    if (marathiRegex.test(line)) {
-                        marathiAddressLines.push(line);
+                    // पिनकोड सापडल्यास पत्ता तिथेच पूर्ण झाला
+                    if (/\b(4\d{5})\b/.test(l)) {
+                        break;
                     }
                 }
             }
 
-            // पिन कोड शोधणे
-            const pinMatch = text.match(/\b(4\d{5})\b/);
-            if (marathiAddressLines.length > 0) {
-                let fullAddr = marathiAddressLines.join(', ').replace(/\s+/g, ' ');
-                if (pinMatch && !fullAddr.includes(pinMatch[0])) {
-                    fullAddr += ', पिन कोड- ' + pinMatch[0];
+            if (addressLines.length > 0) {
+                let completeAddress = addressLines.join(', ').replace(/\s+/g, ' ');
+                // शेवटी पिनकोड व्यवस्थित जोडणे
+                if (pinMatch && !completeAddress.includes(pinMatch[0])) {
+                    completeAddress += ', पिन कोड- ' + pinMatch[0];
                 }
-                box.querySelector('.field_address').value = fullAddr;
+                box.querySelector('.field_address').value = completeAddress;
             } else if (pinMatch && !box.querySelector('.field_address').value) {
                 box.querySelector('.field_address').value = 'पिन कोड- ' + pinMatch[0];
             }
 
-            // ६. मराठी नाव शोधणे (फक्त शुद्ध देवनागरी/मराठी अक्षरे असलेली ओळ)
+            // ६. मराठी संपूर्ण नाव शोधणे (Name Extraction)
             if (!box.querySelector('.field_name').value) {
-                for (let i = 0; i < lines.length; i++) {
-                    const line = lines[i];
+                for (let i = 0; i < rawLines.length; i++) {
+                    const line = rawLines[i];
 
-                    // सरकारी मथळे व इतर शब्द वगळणे
-                    if (/भारत|सरकार|प्राधिकरण|शासकीय|नोंदणी|जन्म|तारीख|वय|पुरुष|स्त्री|पत्ता|मु\.?\s*पो/i.test(line)) {
+                    // सरकारी मथळे व अनावश्यक शब्द वगळणे
+                    if (/भारत|सरकार|Government|India|Unique|Identification|Authority|प्राधिकरण|शासकीय|नोंदणी|जन्म|तारीख|DOB|Year|Male|Female|पुरुष|स्त्री|पत्ता|Address|मु\.?\s*पो/i.test(line)) {
                         continue;
                     }
 
-                    // ओळीत मराठी अक्षरे असावीत आणि इंग्रजी किंवा अंक नसावेत
-                    if (marathiRegex.test(line) && !/[a-zA-Z0-9]/.test(line)) {
+                    // ओळीत मराठी (देवनागरी) अक्षरे असली पाहिजेत आणि अंक नसावेत
+                    if (marathiRegex.test(line) && !/[0-9]/.test(line)) {
                         const words = line.split(/\s+/).filter(w => w.length > 1);
-                        if (words.length >= 2 && words.length <= 4 && line.length > 6) {
+                        // व्यक्तीचे नाव २ ते ४ शब्दांचे असते आणि लांबी ६ अक्षरांपेक्षा जास्त असावी
+                        if (words.length >= 2 && words.length <= 4 && line.length >= 6) {
                             box.querySelector('.field_name').value = line.trim();
                             break;
                         }
@@ -414,6 +103,3 @@
                 }
             }
         }
-    </script>
-</body>
-</html>
