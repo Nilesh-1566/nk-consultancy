@@ -80,7 +80,7 @@
                 <div id="ghenar_container">
                     <div class="party-box" id="ghenar_0">
                         <div class="upload-card-box">
-                            <span style="font-size:13px; font-weight:bold; color:#1e1b4b;">📷 आधार (दोनूय बाजू) किंवा पॅन कार्ड फोटो निवडा:</span><br>
+                            <span style="font-size:13px; font-weight:bold; color:#1e1b4b;">📷 आधार (दोन्ही बाजू) किंवा पॅन कार्ड फोटो निवडा:</span><br>
                             <input type="file" id="file_ghenar_0" accept="image/*,.pdf" multiple style="display:none;" onchange="uploadCardAI(this, 'ghenar_0')">
                             <label for="file_ghenar_0" class="btn-upload">📁 कार्ड फोटो अपलोड करा</label>
                             <div class="status-txt" id="status_ghenar_0"></div>
@@ -114,7 +114,7 @@
                 <div id="denar_container">
                     <div class="party-box" id="denar_0">
                         <div class="upload-card-box">
-                            <span style="font-size:13px; font-weight:bold; color:#1e1b4b;">📷 आधार (दोनूय बाजू) किंवा पॅन कार्ड फोटो निवडा:</span><br>
+                            <span style="font-size:13px; font-weight:bold; color:#1e1b4b;">📷 आधार (दोन्ही बाजू) किंवा पॅन कार्ड फोटो निवडा:</span><br>
                             <input type="file" id="file_denar_0" accept="image/*,.pdf" multiple style="display:none;" onchange="uploadCardAI(this, 'denar_0')">
                             <label for="file_denar_0" class="btn-upload">📁 कार्ड फोटो अपलोड करा</label>
                             <div class="status-txt" id="status_denar_0"></div>
@@ -214,7 +214,7 @@
             div.innerHTML = `
                 <button type="button" class="btn-remove" onclick="document.getElementById('${id}').remove()">काढून टाका ✕</button>
                 <div class="upload-card-box">
-                    <span style="font-size:13px; font-weight:bold; color:#1e1b4b;">📷 आधार (दोनूय बाजू) किंवा पॅन कार्ड फोटो निवडा:</span><br>
+                    <span style="font-size:13px; font-weight:bold; color:#1e1b4b;">📷 आधार (दोन्ही बाजू) किंवा पॅन कार्ड फोटो निवडा:</span><br>
                     <input type="file" id="file_${id}" accept="image/*,.pdf" multiple style="display:none;" onchange="uploadCardAI(this, '${id}')">
                     <label for="file_${id}" class="btn-upload">📁 कार्ड फोटो अपलोड करा</label>
                     <div class="status-txt" id="status_${id}"></div>
@@ -266,13 +266,13 @@
             document.getElementById('area_preview').innerText = 'दस्त मसुद्यात नोंद: ' + formatted;
         }
 
-        // Google Gemini AI वतीन कार्ड वाचप
+        // Google Gemini AI द्वारे कार्ड वाचन
         async function uploadCardAI(input, boxId) {
             if (!input.files || input.files.length === 0) return;
             const status = document.getElementById('status_' + boxId);
             const box = document.getElementById(boxId);
 
-            status.innerText = '⚡ AI कार्ड वाचता... उपकार करून २ सेकंद रावात.';
+            status.innerText = '⚡ AI कार्ड वाचत आहे... कृपया २ सेकंद थांबा.';
 
             const formData = new FormData();
             for (let i = 0; i < input.files.length; i++) {
@@ -292,7 +292,7 @@
                     return;
                 }
 
-                // १००% शुद्ध मराठींत फॉर्म भरप
+                // १००% शुद्ध मराठीत फॉर्म भरणे
                 if (data.name) box.querySelector('.field_name').value = data.name;
                 if (data.age) box.querySelector('.field_age').value = data.age;
                 if (data.address) box.querySelector('.field_address').value = data.address;
@@ -300,9 +300,9 @@
                 if (data.pan) box.querySelector('.field_pan').value = data.pan;
                 if (data.mobile) box.querySelector('.field_mobile').value = data.mobile;
 
-                status.innerText = '✅ माहिती १००% अचूक भरली!';
+                status.innerText = '✅ माहिती १००% अचूक भरली गेली आहे!';
             } catch (err) {
-                status.innerText = 'सर्व्हरा कडेन संपर्क जालो ना. परत प्रयत्न करात.';
+                status.innerText = 'सर्व्हरशी संपर्क होऊ शकला नाही. कृपया पुन्हा प्रयत्न करा.';
             }
         }
 
@@ -310,7 +310,7 @@
         document.getElementById('plotForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const submitBtn = document.querySelector('.submit-btn');
-            submitBtn.innerText = '⏳ Word दस्त तयार जाता...';
+            submitBtn.innerText = '⏳ Word दस्त तयार होत आहे...';
             submitBtn.disabled = true;
 
             try {
@@ -320,7 +320,7 @@
                     body: formData
                 });
 
-                if (!response.ok) throw new Error('सर्व्हर प्रतिसाद दिना');
+                if (!response.ok) throw new Error('सर्व्हर प्रतिसाद देत नाही');
 
                 let filename = 'PLOT_Kharedipatra.docx';
                 const disposition = response.headers.get('Content-Disposition');
@@ -341,13 +341,13 @@
                 a.remove();
                 window.URL.revokeObjectURL(downloadUrl);
 
-                submitBtn.innerText = '✅ दस्त डाऊनलोड जालो!';
+                submitBtn.innerText = '✅ दस्त यशस्वीरीत्या डाऊनलोड झाला!';
                 setTimeout(() => {
                     submitBtn.innerText = '📥 Word (.docx) दस्त डाउनलोड करा';
                     submitBtn.disabled = false;
                 }, 3000);
             } catch (err) {
-                alert('डाऊनलोड करताना चूक जाली: ' + err.message);
+                alert('डाऊनलोड करताना त्रुटी आली: ' + err.message);
                 submitBtn.innerText = '📥 Word (.docx) दस्त डाउनलोड करा';
                 submitBtn.disabled = false;
             }
