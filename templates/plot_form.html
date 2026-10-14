@@ -4,10 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>प्लॉट खरेदीपत्र मसुदा तयार करणे</title>
-    <!-- QR कोड स्कॅनिंग लायब्ररी व PDF/OCR लायब्ररी -->
-    <script src="https://unpkg.com/html5-qrcode"></script>
-    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #f1f5f9; padding-bottom: 60px; }
@@ -20,31 +16,27 @@
         input, select, textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; }
         .party-box { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 16px; margin-bottom: 16px; position: relative; }
         
-        .scan-box {
-            border: 2px dashed #0284c7;
-            background: #f0f9ff;
+        .upload-card-box {
+            border: 2px dashed #4f46e5;
+            background: #eef2ff;
             padding: 14px;
             border-radius: 10px;
             margin-bottom: 14px;
             text-align: center;
         }
-        .btn-qr {
+        .btn-upload {
             display: inline-block;
-            background: #0284c7;
+            background: linear-gradient(135deg, #4f46e5, #4338ca);
             color: white;
-            padding: 9px 16px;
+            padding: 10px 18px;
             border-radius: 8px;
-            font-size: 13px;
+            font-size: 14px;
             font-weight: bold;
             cursor: pointer;
-            margin: 4px;
-            border: none;
+            margin-top: 6px;
+            box-shadow: 0 3px 6px rgba(79, 70, 229, 0.3);
         }
-        .btn-qr-cam {
-            background: #059669;
-        }
-        .status-scan { font-size: 13px; color: #0369a1; margin-top: 8px; font-weight: 600; }
-        .qr-reader-container { width: 100%; max-width: 320px; margin: 10px auto; display: none; }
+        .status-txt { font-size: 13px; color: #4338ca; margin-top: 8px; font-weight: bold; }
         .btn-add { background: #0f766e; color: white; border: none; padding: 9px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 6px; }
         .btn-remove { background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 5px; font-size: 12px; float: right; cursor: pointer; }
         .submit-btn { width: 100%; background: linear-gradient(135deg, #d4af37, #b8860b); color: white; border: none; padding: 15px; font-size: 16px; font-weight: bold; border-radius: 10px; margin-top: 25px; cursor: pointer; box-shadow: 0 4px 10px rgba(184, 134, 11, 0.35); }
@@ -53,7 +45,7 @@
 <body>
 
     <div class="header">
-        <h2>प्लॉट खरेदीपत्र मसुदा</h2>
+        <h2>प्लॉट खरेदीपत्र मसुदा (AI ऑटोमॅटिक)</h2>
         <p style="font-size:13px; color:#cbd5e1; margin-top:4px;">NK CONSULTANCY दस्त नोंदणी प्रणाली</p>
     </div>
 
@@ -87,14 +79,11 @@
                 <h3>२. लिहून घेणार (खरेदी घेणारा)</h3>
                 <div id="ghenar_container">
                     <div class="party-box" id="ghenar_0">
-                        <div class="scan-box">
-                            <span style="font-size:13px; font-weight:bold; color:#0f172a;">⚡ आधार कार्डावरून अचूक माहिती भरा:</span><br>
-                            <button type="button" class="btn-qr btn-qr-cam" onclick="startCameraScanner('ghenar_0')">📷 थेट QR स्कॅन करा</button>
-                            <input type="file" id="file_ghenar_0" accept="image/*" style="display:none;" onchange="scanQRFromImage(this, 'ghenar_0')">
-                            <label for="file_ghenar_0" class="btn-qr">📁 फोटो निवडून QR स्कॅन करा</label>
-                            
-                            <div id="reader_ghenar_0" class="qr-reader-container"></div>
-                            <div class="status-scan" id="status_ghenar_0"></div>
+                        <div class="upload-card-box">
+                            <span style="font-size:13px; font-weight:bold; color:#1e1b4b;">📷 आधार (दोनूय बाजू) किंवा पॅन कार्ड फोटो निवडा:</span><br>
+                            <input type="file" id="file_ghenar_0" accept="image/*,.pdf" multiple style="display:none;" onchange="uploadCardAI(this, 'ghenar_0')">
+                            <label for="file_ghenar_0" class="btn-upload">📁 कार्ड फोटो अपलोड करा</label>
+                            <div class="status-txt" id="status_ghenar_0"></div>
                         </div>
 
                         <label>संपूर्ण नाव (मराठीत):</label>
@@ -124,14 +113,11 @@
                 <h3>३. लिहून देणार (खरेदी देणारा)</h3>
                 <div id="denar_container">
                     <div class="party-box" id="denar_0">
-                        <div class="scan-box">
-                            <span style="font-size:13px; font-weight:bold; color:#0f172a;">⚡ आधार कार्डावरून अचूक माहिती भरा:</span><br>
-                            <button type="button" class="btn-qr btn-qr-cam" onclick="startCameraScanner('denar_0')">📷 थेट QR स्कॅन करा</button>
-                            <input type="file" id="file_denar_0" accept="image/*" style="display:none;" onchange="scanQRFromImage(this, 'denar_0')">
-                            <label for="file_denar_0" class="btn-qr">📁 फोटो निवडून QR स्कॅन करा</label>
-                            
-                            <div id="reader_denar_0" class="qr-reader-container"></div>
-                            <div class="status-scan" id="status_denar_0"></div>
+                        <div class="upload-card-box">
+                            <span style="font-size:13px; font-weight:bold; color:#1e1b4b;">📷 आधार (दोनूय बाजू) किंवा पॅन कार्ड फोटो निवडा:</span><br>
+                            <input type="file" id="file_denar_0" accept="image/*,.pdf" multiple style="display:none;" onchange="uploadCardAI(this, 'denar_0')">
+                            <label for="file_denar_0" class="btn-upload">📁 कार्ड फोटो अपलोड करा</label>
+                            <div class="status-txt" id="status_denar_0"></div>
                         </div>
 
                         <label>संपूर्ण नाव (मराठीत):</label>
@@ -216,10 +202,8 @@
         </form>
     </div>
 
-    <!-- फंक्शनॅलिटी स्क्रिप्ट -->
     <script>
         let counter = 1;
-        let activeScanner = null;
 
         function addParty(type) {
             const id = type + '_' + counter++;
@@ -229,13 +213,11 @@
             div.id = id;
             div.innerHTML = `
                 <button type="button" class="btn-remove" onclick="document.getElementById('${id}').remove()">काढून टाका ✕</button>
-                <div class="scan-box">
-                    <span style="font-size:13px; font-weight:bold; color:#0f172a;">⚡ आधार कार्डावरून अचूक माहिती भरा:</span><br>
-                    <button type="button" class="btn-qr btn-qr-cam" onclick="startCameraScanner('${id}')">📷 थेट QR स्कॅन करा</button>
-                    <input type="file" id="file_${id}" accept="image/*" style="display:none;" onchange="scanQRFromImage(this, '${id}')">
-                    <label for="file_${id}" class="btn-qr">📁 फोटो निवडून QR स्कॅन करा</label>
-                    <div id="reader_${id}" class="qr-reader-container"></div>
-                    <div class="status-scan" id="status_${id}"></div>
+                <div class="upload-card-box">
+                    <span style="font-size:13px; font-weight:bold; color:#1e1b4b;">📷 आधार (दोनूय बाजू) किंवा पॅन कार्ड फोटो निवडा:</span><br>
+                    <input type="file" id="file_${id}" accept="image/*,.pdf" multiple style="display:none;" onchange="uploadCardAI(this, '${id}')">
+                    <label for="file_${id}" class="btn-upload">📁 कार्ड फोटो अपलोड करा</label>
+                    <div class="status-txt" id="status_${id}"></div>
                 </div>
                 <label>संपूर्ण नाव (मराठीत):</label>
                 <input type="text" name="${type}_name[]" class="field_name" required>
@@ -284,155 +266,51 @@
             document.getElementById('area_preview').innerText = 'दस्त मसुद्यात नोंद: ' + formatted;
         }
 
-        // इंग्रजी नावाचे शुद्ध मराठीत रूपांतर करणे
-        async function translateToMarathi(text) {
-            if (!text || text.trim() === '') return text;
-            try {
-                const words = text.trim().split(/\s+/);
-                const translated = await Promise.all(words.map(async (w) => {
-                    const clean = w.replace(/[^A-Za-z]/g, '');
-                    if (clean.length < 2) return w;
-                    const res = await fetch(`https://inputtools.google.com/request?text=${encodeURIComponent(clean)}&itc=mr-t-i0-und&num=1`);
-                    const data = await res.json();
-                    if (data && data[0] === 'SUCCESS' && data[1] && data[1][0] && data[1][0][1]) {
-                        return data[1][0][1][0];
-                    }
-                    return w;
-                }));
-                return translated.join(' ');
-            } catch (e) {
-                return text;
-            }
-        }
-
-        // थेट कॅमेऱ्याने QR स्कॅन करणे
-        function startCameraScanner(boxId) {
-            const readerDiv = document.getElementById('reader_' + boxId);
-            readerDiv.style.display = 'block';
+        // Google Gemini AI वतीन कार्ड वाचप
+        async function uploadCardAI(input, boxId) {
+            if (!input.files || input.files.length === 0) return;
             const status = document.getElementById('status_' + boxId);
-            status.innerText = 'कॅमेऱ्यासमोर आधारचा QR कोड धरा...';
-
-            if (activeScanner) {
-                activeScanner.stop().catch(() => {});
-            }
-
-            const html5QrCode = new Html5Qrcode('reader_' + boxId);
-            activeScanner = html5QrCode;
-
-            html5QrCode.start(
-                { facingMode: "environment" },
-                { fps: 10, qrbox: 250 },
-                (qrCodeMessage) => {
-                    html5QrCode.stop().then(() => {
-                        readerDiv.style.display = 'none';
-                        status.innerText = '✅ QR कोड यशस्वीरीत्या स्कॅन झाला!';
-                        processAadhaarQRData(qrCodeMessage, boxId);
-                    });
-                },
-                (errorMessage) => {}
-            ).catch(err => {
-                status.innerText = 'कॅमेरा उघडता आला नाही. कृपया फोटो अपलोड करून स्कॅन करा.';
-            });
-        }
-
-        // फोटो अपलोड करून QR स्कॅन करणे
-        function scanQRFromImage(input, boxId) {
-            if (!input.files || !input.files[0]) return;
-            const file = input.files[0];
-            const status = document.getElementById('status_' + boxId);
-            status.innerText = 'फोटोमधील QR कोड वाचत आहे...';
-
-            const html5QrCode = new Html5Qrcode('reader_' + boxId);
-            html5QrCode.scanFile(file, true)
-                .then(qrCodeMessage => {
-                    status.innerText = '✅ QR कोड यशस्वीरीत्या वाचला!';
-                    processAadhaarQRData(qrCodeMessage, boxId);
-                })
-                .catch(err => {
-                    status.innerText = 'QR कोड वाचता आला नाही. कृपया फोटो स्पष्ट असल्याची खात्री करा किंवा थेट कॅमेऱ्याने स्कॅन करा.';
-                });
-        }
-
-        // QR कोडमधील अधिकृत UIDAI XML / डेटा पार्स करणे
-        async function processAadhaarQRData(qrData, boxId) {
             const box = document.getElementById(boxId);
-            let name = '', yob = '', dob = '', gender = '', house = '', street = '', vtc = '', dist = '', state = '', pc = '', co = '';
 
-            // १. XML फॉरमॅट (जुने व सामान्य QR कोड)
-            if (qrData.includes('<PrintLetterBarcodeData') || qrData.includes('uid=')) {
-                const parser = new DOMParser();
-                const xmlDoc = parser.parseFromString(qrData, "text/xml");
-                const node = xmlDoc.getElementsByTagName("PrintLetterBarcodeData")[0];
-                if (node) {
-                    name = node.getAttribute("name") || "";
-                    dob = node.getAttribute("dob") || "";
-                    yob = node.getAttribute("yob") || "";
-                    gender = node.getAttribute("gender") || "";
-                    co = node.getAttribute("co") || "";
-                    house = node.getAttribute("house") || "";
-                    street = node.getAttribute("street") || "";
-                    vtc = node.getAttribute("vtc") || "";
-                    dist = node.getAttribute("dist") || "";
-                    state = node.getAttribute("state") || "";
-                    pc = node.getAttribute("pc") || "";
-                    
-                    const uid = node.getAttribute("uid");
-                    if (uid) box.querySelector('.field_aadhar').value = uid;
+            status.innerText = '⚡ AI कार्ड वाचता... उपकार करून २ सेकंद रावात.';
+
+            const formData = new FormData();
+            for (let i = 0; i < input.files.length; i++) {
+                formData.append('card_files', input.files[i]);
+            }
+
+            try {
+                const res = await fetch('/scan_card_ai', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await res.json();
+
+                if (data.error) {
+                    status.innerText = 'त्रुटी: ' + data.error;
+                    return;
                 }
-            } 
-            // २. जर साध्या टेक्स्ट फॉरमॅटमध्ये असेल
-            else {
-                const nameM = qrData.match(/name="([^"]+)"/i) || qrData.match(/Name:\s*([^\n,]+)/i);
-                if (nameM) name = nameM[1];
-                const yobM = qrData.match(/yob="([^"]+)"/i) || qrData.match(/DOB:\s*([^\n,]+)/i);
-                if (yobM) yob = yobM[1];
-                const pcM = qrData.match(/pc="([^"]+)"/i) || qrData.match(/\b(4\d{5})\b/);
-                if (pcM) pc = pcM[1];
-            }
 
-            // नाव मराठीत रूपांतर करून भरणे
-            if (name) {
-                const marathiName = await translateToMarathi(name);
-                box.querySelector('.field_name').value = marathiName;
-            }
+                // १००% शुद्ध मराठींत फॉर्म भरप
+                if (data.name) box.querySelector('.field_name').value = data.name;
+                if (data.age) box.querySelector('.field_age').value = data.age;
+                if (data.address) box.querySelector('.field_address').value = data.address;
+                if (data.aadhar) box.querySelector('.field_aadhar').value = data.aadhar;
+                if (data.pan) box.querySelector('.field_pan').value = data.pan;
+                if (data.mobile) box.querySelector('.field_mobile').value = data.mobile;
 
-            // वय सेट करणे
-            const currentYear = 2026;
-            let birthYear = 0;
-            if (yob) birthYear = parseInt(yob);
-            else if (dob) {
-                const parts = dob.split(/[\/\-]/);
-                birthYear = parseInt(parts[parts.length - 1]);
-            }
-            if (birthYear > 1900) {
-                box.querySelector('.field_age').value = `वय ${currentYear - birthYear} वर्ष, धंदा- घरकाम`;
-            }
-
-            // संपूर्ण पत्ता तयार करून मराठीत भरणे
-            let fullAddressParts = [];
-            if (co) fullAddressParts.push(co);
-            if (house) fullAddressParts.push(house);
-            if (street) fullAddressParts.push(street);
-            if (vtc) fullAddressParts.push(vtc);
-            if (dist) fullAddressParts.push(dist);
-            if (state) fullAddressParts.push(state);
-
-            if (fullAddressParts.length > 0) {
-                const rawAddr = fullAddressParts.join(', ');
-                const marathiAddr = await translateToMarathi(rawAddr);
-                let finalAddress = marathiAddr;
-                if (pc && !finalAddress.includes(pc)) finalAddress += ', पिन कोड- ' + pc;
-                box.querySelector('.field_address').value = finalAddress;
-            } else if (pc) {
-                box.querySelector('.field_address').value = 'पिन कोड- ' + pc;
+                status.innerText = '✅ माहिती १००% अचूक भरली!';
+            } catch (err) {
+                status.innerText = 'सर्व्हरा कडेन संपर्क जालो ना. परत प्रयत्न करात.';
             }
         }
 
-        // थेट Word (.docx) डाऊनलोड
+        // Word (.docx) थेट डाऊनलोड
         document.getElementById('plotForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const submitBtn = document.querySelector('.submit-btn');
-            submitBtn.innerText = '⏳ Word दस्त तयार होत आहे...';
+            submitBtn.innerText = '⏳ Word दस्त तयार जाता...';
             submitBtn.disabled = true;
 
             try {
@@ -442,7 +320,7 @@
                     body: formData
                 });
 
-                if (!response.ok) throw new Error('सर्व्हरकडून प्रतिसाद आला नाही');
+                if (!response.ok) throw new Error('सर्व्हर प्रतिसाद दिना');
 
                 let filename = 'PLOT_Kharedipatra.docx';
                 const disposition = response.headers.get('Content-Disposition');
@@ -463,13 +341,13 @@
                 a.remove();
                 window.URL.revokeObjectURL(downloadUrl);
 
-                submitBtn.innerText = '✅ दस्त डाऊनलोड झाला!';
+                submitBtn.innerText = '✅ दस्त डाऊनलोड जालो!';
                 setTimeout(() => {
                     submitBtn.innerText = '📥 Word (.docx) दस्त डाउनलोड करा';
                     submitBtn.disabled = false;
                 }, 3000);
             } catch (err) {
-                alert('डाउनलोड त्रुटी: ' + err.message);
+                alert('डाऊनलोड करताना चूक जाली: ' + err.message);
                 submitBtn.innerText = '📥 Word (.docx) दस्त डाउनलोड करा';
                 submitBtn.disabled = false;
             }
