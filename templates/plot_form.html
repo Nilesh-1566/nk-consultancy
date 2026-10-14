@@ -4,9 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>प्लॉट खरेदीपत्र मसुदा तयार करणे</title>
-    <!-- Tesseract OCR व PDF वाचनासाठी आवश्यक लायब्ररी -->
-    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #f1f5f9; padding-bottom: 60px; }
@@ -20,8 +17,8 @@
         .party-box { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 16px; margin-bottom: 16px; position: relative; }
         
         .upload-card-box {
-            border: 2px dashed #0284c7;
-            background: #f0f9ff;
+            border: 2px dashed #4f46e5;
+            background: #eef2ff;
             padding: 14px;
             border-radius: 10px;
             margin-bottom: 14px;
@@ -29,7 +26,7 @@
         }
         .btn-upload {
             display: inline-block;
-            background: #0284c7;
+            background: linear-gradient(135deg, #4f46e5, #4338ca);
             color: white;
             padding: 10px 18px;
             border-radius: 8px;
@@ -37,9 +34,9 @@
             font-weight: bold;
             cursor: pointer;
             margin-top: 6px;
-            box-shadow: 0 3px 6px rgba(2, 132, 199, 0.3);
+            box-shadow: 0 3px 6px rgba(79, 70, 229, 0.3);
         }
-        .status-txt { font-size: 13px; color: #0369a1; margin-top: 8px; font-weight: bold; }
+        .status-txt { font-size: 13px; color: #4338ca; margin-top: 8px; font-weight: bold; }
         .btn-add { background: #0f766e; color: white; border: none; padding: 9px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 6px; }
         .btn-remove { background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 5px; font-size: 12px; float: right; cursor: pointer; }
         .submit-btn { width: 100%; background: linear-gradient(135deg, #d4af37, #b8860b); color: white; border: none; padding: 15px; font-size: 16px; font-weight: bold; border-radius: 10px; margin-top: 25px; cursor: pointer; box-shadow: 0 4px 10px rgba(184, 134, 11, 0.35); }
@@ -48,7 +45,7 @@
 <body>
 
     <div class="header">
-        <h2>प्लॉट खरेदीपत्र मसुदा</h2>
+        <h2>प्लॉट खरेदीपत्र मसुदा (AI ऑटोमॅटिक)</h2>
         <p style="font-size:13px; color:#cbd5e1; margin-top:4px;">NK CONSULTANCY दस्त नोंदणी प्रणाली</p>
     </div>
 
@@ -83,8 +80,8 @@
                 <div id="ghenar_container">
                     <div class="party-box" id="ghenar_0">
                         <div class="upload-card-box">
-                            <span style="font-size:13px; font-weight:bold; color:#0f172a;">📷 आधार (दोन्ही बाजू) किंवा पॅन कार्ड फोटो निवडा:</span><br>
-                            <input type="file" id="file_ghenar_0" accept="image/*,.pdf" multiple style="display:none;" onchange="processCardWithGoogleTranslate(this, 'ghenar_0')">
+                            <span style="font-size:13px; font-weight:bold; color:#1e1b4b;">📷 आधार (दोन्ही बाजू) किंवा पॅन कार्ड फोटो निवडा:</span><br>
+                            <input type="file" id="file_ghenar_0" accept="image/*,.pdf" multiple style="display:none;" onchange="uploadCardAI(this, 'ghenar_0')">
                             <label for="file_ghenar_0" class="btn-upload">📁 कार्ड फोटो अपलोड करा</label>
                             <div class="status-txt" id="status_ghenar_0"></div>
                         </div>
@@ -117,8 +114,8 @@
                 <div id="denar_container">
                     <div class="party-box" id="denar_0">
                         <div class="upload-card-box">
-                            <span style="font-size:13px; font-weight:bold; color:#0f172a;">📷 आधार (दोन्ही बाजू) किंवा पॅन कार्ड फोटो निवडा:</span><br>
-                            <input type="file" id="file_denar_0" accept="image/*,.pdf" multiple style="display:none;" onchange="processCardWithGoogleTranslate(this, 'denar_0')">
+                            <span style="font-size:13px; font-weight:bold; color:#1e1b4b;">📷 आधार (दोन्ही बाजू) किंवा पॅन कार्ड फोटो निवडा:</span><br>
+                            <input type="file" id="file_denar_0" accept="image/*,.pdf" multiple style="display:none;" onchange="uploadCardAI(this, 'denar_0')">
                             <label for="file_denar_0" class="btn-upload">📁 कार्ड फोटो अपलोड करा</label>
                             <div class="status-txt" id="status_denar_0"></div>
                         </div>
@@ -205,7 +202,7 @@
         </form>
     </div>
 
-    <!-- फंक्शनॅलिटी स्क्रिप्ट (Google Input Tools & Translation Engine) -->
+    <!-- फंक्शनॅलिटी स्क्रिप्ट -->
     <script>
         let counter = 1;
 
@@ -218,8 +215,8 @@
             div.innerHTML = `
                 <button type="button" class="btn-remove" onclick="document.getElementById('${id}').remove()">काढून टाका ✕</button>
                 <div class="upload-card-box">
-                    <span style="font-size:13px; font-weight:bold; color:#0f172a;">📷 आधार (दोन्ही बाजू) किंवा पॅन कार्ड फोटो निवडा:</span><br>
-                    <input type="file" id="file_${id}" accept="image/*,.pdf" multiple style="display:none;" onchange="processCardWithGoogleTranslate(this, '${id}')">
+                    <span style="font-size:13px; font-weight:bold; color:#1e1b4b;">📷 आधार (दोन्ही बाजू) किंवा पॅन कार्ड फोटो निवडा:</span><br>
+                    <input type="file" id="file_${id}" accept="image/*,.pdf" multiple style="display:none;" onchange="uploadCardAI(this, '${id}')">
                     <label for="file_${id}" class="btn-upload">📁 कार्ड फोटो अपलोड करा</label>
                     <div class="status-txt" id="status_${id}"></div>
                 </div>
@@ -228,7 +225,7 @@
                 <label>वय व धंदा:</label>
                 <input type="text" name="${type}_age_occ[]" class="field_age" placeholder="वय -- वर्ष, धंदा- --">
                 <label>पत्ता व पिनकोड (मराठीत):</label>
-                <textarea name="${type}_address[]" class="field_address" rows="2" placeholder="रा. --, पिन कोड- --"></textarea>
+                <textarea name="${type}_address[]" class="field_address" rows="2" placeholder="रा. --, ता. --, जि. --, पिन कोड- --"></textarea>
                 <label>आधार क्रमांक:</label>
                 <input type="text" name="${type}_aadhar[]" class="field_aadhar" placeholder="xxxx xxxx xxxx">
                 <label>पॅन नंबर:</label>
@@ -270,168 +267,77 @@
             document.getElementById('area_preview').innerText = 'दस्त मसुद्यात नोंद: ' + formatted;
         }
 
-        // Google Transliteration API (इंग्रजी स्पेलिंगचे शुद्ध मराठीत १००% अचूक रूपांतर)
-        async function googleTransliterateWord(word) {
-            if (!word || !/^[A-Za-z]+$/.test(word)) return word;
-            try {
-                const res = await fetch(`https://inputtools.google.com/request?text=${encodeURIComponent(word)}&itc=mr-t-i0-und&num=1`);
-                const data = await res.json();
-                if (data && data[0] === 'SUCCESS' && data[1] && data[1][0] && data[1][0][1] && data[1][0][1][0]) {
-                    return data[1][0][1][0];
-                }
-            } catch (e) {}
-            return word;
-        }
-
-        // पत्ता व वाक्याचे मराठीत रूपांतर
-        async function googleTransliterateSentence(text) {
-            if (!text || text.trim() === '') return text;
-            const words = text.trim().split(/\s+/);
-            const converted = await Promise.all(words.map(async (w) => {
-                const clean = w.replace(/[^A-Za-z]/g, '');
-                if (clean.length < 2) return w;
-                
-                const lower = clean.toLowerCase();
-                if (lower === 'at') return 'मु.';
-                if (lower === 'post' || lower === 'po') return 'पो.';
-                if (lower === 'tal' || lower === 'taluka') return 'ता.';
-                if (lower === 'dist' || lower === 'district') return 'जि.';
-                if (lower === 'road') return 'मार्ग';
-                if (lower === 'lane') return 'गल्ली';
-                if (lower === 'maharashtra') return 'महाराष्ट्र';
-                if (lower === 'near') return 'जवळ';
-                
-                return await googleTransliterateWord(clean);
-            }));
-            return converted.join(' ');
-        }
-
-        // फोटो रिसाईज
-        function prepareImage(file) {
+        // फोटो कॉम्प्रेस करण्याचे फंक्शन
+        function compressImageForAI(file) {
             return new Promise((resolve) => {
                 const img = new Image();
                 img.onload = () => {
                     const canvas = document.createElement('canvas');
                     let w = img.width;
                     let h = img.height;
-                    const maxDim = 1500;
+                    const maxDim = 1200;
                     if (w > maxDim || h > maxDim) {
-                        if (w > h) { h = Math.round((h * maxDim) / w); w = maxDim; }
-                        else { w = Math.round((w * maxDim) / h); h = maxDim; }
+                        if (w > h) {
+                            h = Math.round((h * maxDim) / w);
+                            w = maxDim;
+                        } else {
+                            w = Math.round((w * maxDim) / h);
+                            h = maxDim;
+                        }
                     }
-                    canvas.width = w; canvas.height = h;
+                    canvas.width = w;
+                    canvas.height = h;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, w, h);
-                    canvas.toBlob((blob) => resolve(blob), 'image/jpeg', 0.92);
+                    canvas.toBlob((blob) => resolve(blob), 'image/jpeg', 0.85);
                 };
                 img.src = URL.createObjectURL(file);
             });
         }
 
-        // कार्ड फोटो वाचणे व Google द्वारे मराठीत भरणे
-        async function processCardWithGoogleTranslate(input, boxId) {
+        // Google Gemini AI कडे कॉम्प्रेस केलेला हलका फोटो पाठवणे
+        async function uploadCardAI(input, boxId) {
             if (!input.files || input.files.length === 0) return;
-            const files = Array.from(input.files);
             const status = document.getElementById('status_' + boxId);
             const box = document.getElementById(boxId);
 
-            status.innerText = `फोटो तपासत आहे... (${files.length} फोटो)`;
-            let combinedText = '';
+            status.innerText = '⚡ फोटो तयार होत आहे व AI कडे पाठवत आहे...';
 
-            for (let i = 0; i < files.length; i++) {
-                status.innerText = `कार्ड वाचत आहे (${i + 1}/${files.length})...`;
-                try {
-                    const imgBlob = await prepareImage(files[i]);
-                    // इंग्रजी अक्षरे १००% बिनचूक वाचली जातात
-                    const res = await Tesseract.recognize(imgBlob, 'eng');
-                    combinedText += '\n' + res.data.text;
-                } catch (e) {}
+            const formData = new FormData();
+            for (let i = 0; i < input.files.length; i++) {
+                const compressedBlob = await compressImageForAI(input.files[i]);
+                formData.append('card_files', compressedBlob, `card_${i}.jpg`);
             }
 
-            status.innerText = '⚡ Google ट्रान्सलेशनद्वारे मराठीत रूपांतर होत आहे...';
-            await parseAndFillWithGoogle(combinedText, box);
-            status.innerText = '✅ माहिती १००% अचूक मराठीत भरली गेली आहे!';
-        }
+            try {
+                status.innerText = '⚡ AI कार्ड वाचत आहे... कृपया ५-१० सेकंद थांबा.';
+                const res = await fetch('/scan_card_ai', {
+                    method: 'POST',
+                    body: formData
+                });
 
-        // अचूक पार्सर
-        async function parseAndFillWithGoogle(text, box) {
-            const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+                const data = await res.json();
 
-            // १. PAN
-            const panMatch = text.match(/[A-Z]{5}[0-9]{4}[A-Z]{1}/);
-            if (panMatch && !box.querySelector('.field_pan').value) {
-                box.querySelector('.field_pan').value = panMatch[0];
-            }
-
-            // २. आधार क्रमांक
-            const aadharMatch = text.match(/\b\d{4}\s?\d{4}\s?\d{4}\b/);
-            if (aadharMatch && !box.querySelector('.field_aadhar').value) {
-                box.querySelector('.field_aadhar').value = aadharMatch[0];
-            }
-
-            // ३. मोबाईल
-            const mobMatch = text.match(/\b[6-9]\d{9}\b/);
-            if (mobMatch && !box.querySelector('.field_mobile').value) {
-                box.querySelector('.field_mobile').value = mobMatch[0];
-            }
-
-            // ४. वय व जन्म तारीख
-            const currentYear = 2026;
-            const dobMatch = text.match(/(?:DOB|Birth|Year)[:\s/]*([0-9]{4}|[0-9]{2}[/-][0-9]{2}[/-][0-9]{4})/i);
-            if (dobMatch) {
-                let yrStr = dobMatch[1];
-                if (yrStr.length > 4) yrStr = yrStr.slice(-4);
-                const y = parseInt(yrStr);
-                if (y > 1920 && y <= currentYear) {
-                    box.querySelector('.field_age').value = `वय ${currentYear - y} वर्ष, धंदा- घरकाम`;
+                if (!res.ok || data.error) {
+                    status.innerText = 'त्रुटी: ' + (data.error || 'सर्व्हर कोड ' + res.status);
+                    return;
                 }
-            }
 
-            // ५. नाव शोधून Google द्वारे शुद्ध मराठी करणे (Title Case Name)
-            let detectedName = '';
-            for (let i = 0; i < lines.length; i++) {
-                const l = lines[i].replace(/[^A-Za-z\s]/g, '').trim();
-                if (/Government|India|Unique|Authority|DOB|Father|Female|Male|Income|Tax|Address/i.test(l)) continue;
-                const words = l.split(/\s+/).filter(w => w.length >= 2);
-                const isTitleCase = words.length >= 2 && words.every(w => /^[A-Z][a-z]+$/.test(w));
-                if (isTitleCase && words.length <= 4 && l.length >= 7) {
-                    detectedName = l;
-                    break;
-                }
-            }
+                // १००% शुद्ध मराठीत फॉर्म भरणे
+                if (data.name) box.querySelector('.field_name').value = data.name;
+                if (data.age) box.querySelector('.field_age').value = data.age;
+                if (data.address) box.querySelector('.field_address').value = data.address;
+                if (data.aadhar) box.querySelector('.field_aadhar').value = data.aadhar;
+                if (data.pan) box.querySelector('.field_pan').value = data.pan;
+                if (data.mobile) box.querySelector('.field_mobile').value = data.mobile;
 
-            if (detectedName) {
-                const marathiName = await googleTransliterateSentence(detectedName);
-                box.querySelector('.field_name').value = marathiName;
-            }
-
-            // ६. पत्ता शोधून Google द्वारे शुद्ध मराठी करणे
-            const pinMatch = text.match(/\b(4\d{5})\b/);
-            let addressLines = [];
-            let readingAddr = false;
-
-            for (let i = 0; i < lines.length; i++) {
-                const l = lines[i];
-                if (/Address[:\s]/i.test(l) || /W\/O|S\/O|D\/O|C\/O/i.test(l)) readingAddr = true;
-                if (readingAddr) {
-                    let clean = l.replace(/.*Address[:\s]*/i, '').replace(/[^A-Za-z0-9\s,\/\-]/g, '').trim();
-                    if (clean.length > 2 && !/Unique|Authority|www|uidai/i.test(clean)) addressLines.push(clean);
-                    if (/\b(4\d{5})\b/.test(l) || addressLines.length >= 3) break;
-                }
-            }
-
-            if (addressLines.length > 0) {
-                const rawAddr = addressLines.join(', ');
-                const marathiAddr = await googleTransliterateSentence(rawAddr);
-                let finalAddr = marathiAddr;
-                if (pinMatch && !finalAddr.includes(pinMatch[0])) finalAddr += ', पिन कोड- ' + pinMatch[0];
-                box.querySelector('.field_address').value = finalAddr;
-            } else if (pinMatch && !box.querySelector('.field_address').value) {
-                box.querySelector('.field_address').value = 'पिन कोड- ' + pinMatch[0];
+                status.innerText = '✅ माहिती १००% अचूक भरली गेली आहे!';
+            } catch (err) {
+                status.innerText = 'तांत्रिक त्रुटी: ' + err.message + ' (कृपया पुन्हा प्रयत्न करा)';
             }
         }
 
-        // थेट Word (.docx) डाऊनलोड
+        // थेट Word (.docx) डाऊनलोड लॉजिक
         document.getElementById('plotForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const submitBtn = document.querySelector('.submit-btn');
@@ -451,7 +357,9 @@
                 const disposition = response.headers.get('Content-Disposition');
                 if (disposition && disposition.indexOf('filename=') !== -1) {
                     const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(disposition);
-                    if (matches != null && matches[1]) filename = matches[1].replace(/['"]/g, '');
+                    if (matches != null && matches[1]) {
+                        filename = matches[1].replace(/['"]/g, '');
+                    }
                 }
 
                 const blob = await response.blob();
