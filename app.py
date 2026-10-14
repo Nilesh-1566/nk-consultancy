@@ -44,9 +44,9 @@ def scan_card_ai():
         महत्त्वाचे: फक्त आणि फक्त JSON आउटपुट द्या. इतर कोणताही मजकूर किंवा स्पष्टीकरण लिहू नका.
         """
 
-        # Gemini 2.5 Flash मॉडेल वापरून थेट वाचन
+        # अधिकृत gemini-3.8-flash मॉडेल वापरून थेट वाचन
         response = client.models.generate_content(
-            model='gemini-2.5-flash',
+            model='gemini-3.8-flash',
             contents=[prompt, *images_payload]
         )
 
@@ -197,6 +197,7 @@ def generate_plot_docx():
         f"म्हणून स्वसंतोषाने व अक्कल हुशारीने लिहून दिले कायम खूष खरेदीपत्र असे सही ता. {form.get('doc_date')} इ."
     )
 
+    # Word फाईल तयार करून डाऊनलोड करणे
     target_stream = io.BytesIO()
     doc.save(target_stream)
     target_stream.seek(0)
