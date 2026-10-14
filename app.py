@@ -9,7 +9,7 @@ import urllib.parse
 
 app = Flask(__name__)
 
-# १. Gemini API Key कॉन्फिगरेशन (नवीन google-genai SDK)
+# १. Gemini API Key कॉन्फिगरेशन
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "AQ.Ab8RN6LqhXJUZBYHwOTyxDAeTHuGRfCbhk-YiPdeOlj62xdc7g")
 client = genai.Client(api_key=GEMINI_API_KEY)
 
@@ -44,9 +44,9 @@ def scan_card_ai():
         महत्त्वाचे: फक्त आणि फक्त JSON आउटपुट द्या. इतर कोणताही मजकूर किंवा स्पष्टीकरण लिहू नका.
         """
 
-        # Gemini 2.5 Flash द्वारे इमेज प्रोसेसिंग
+        # सक्रिय Gemini 1.5 Flash मॉडेल वापरून वाचन
         response = client.models.generate_content(
-            model='gemini-2.5-flash',
+            model='gemini-1.5-flash',
             contents=[prompt] + images_payload
         )
 
