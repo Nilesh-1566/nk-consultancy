@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>प्लॉट खरेदीपत्र मसुदा तयार करणे</title>
-    <!-- OCR व PDF वाचनासाठी लायब्ररी -->
+    <!-- OCR व PDF वाचनासाठी आवश्यक लायब्ररी -->
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <style>
@@ -52,7 +52,7 @@
     </div>
 
     <div class="container">
-        <form action="/generate_plot_docx" method="POST">
+        <form id="plotForm">
 
             <!-- १. प्राथमिक माहिती -->
             <div class="card">
@@ -271,22 +271,7 @@
             document.getElementById('area_preview').innerText = 'दस्त मसुद्यात नोंद: ' + formatted;
         }
 
-        // इंग्रजी शब्दांचे शुद्ध मराठीत रूपांतर करणे
-        async function convertToMarathi(text) {
-            if (!text || text.trim() === '') return text;
-            try {
-                const res = await fetch(`https://inputtools.google.com/request?text=${encodeURIComponent(text)}&itc=mr-t-i0-und&num=1`);
-                const data = await res.json();
-                if (data && data[0] === 'SUCCESS' && data[1] && data[1][0] && data[1][0][1]) {
-                    return data[1][0][1][0];
-                }
-            } catch (e) {
-                console.error("Transliteration error:", e);
-            }
-            return text;
-        }
-
-        // एकापेक्षा जास्त फोटो प्रोसेस करणे
+        // फाईल्स स्कॅन करणे (मराठी + इंग्रजी थेट वाचन)
         async function handleFiles(input, boxId) {
             if (!input.files || input.files.length === 0) return;
             const files = Array.from(input.files);
@@ -294,7 +279,6 @@
             const box = document.getElementById(boxId);
 
             status.innerText = `स्कॅन सुरू आहे... (${files.length} फोटो)`;
-
             let combinedText = '';
 
             for (let i = 0; i < files.length; i++) {
@@ -315,29 +299,24 @@
                         imageBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg'));
                     }
 
-                    const res = await Tesseract.recognize(imageBlob, 'eng', {
-                        logger: m => {
-                            if (m.status === 'recognizing text') {
-                                status.innerText = `वाचत आहे: ${Math.round(m.progress * 100)}%`;
-                            }
-                        }
-                    });
+                    // mar+eng दोन्ही भाषा लोड करून कार्ड तपासणे
+                    const res = await Tesseract.recognize(imageBlob, 'mar+eng');
                     combinedText += '\n' + res.data.text;
                 } catch (e) {
-                    console.error('File OCR error:', e);
+                    console.error("OCR Error:", e);
                 }
             }
 
-            status.innerText = '✅ माहिती वाचण्यात आली! मराठीत रूपांतर होत आहे...';
-            await parseAndFillDataSmart(combinedText, box);
-            status.innerText = '✅ माहिती मराठीत भरली गेली आहे!';
+            status.innerText = '✅ माहिती वाचली! मराठी फॉर्म भरत आहे...';
+            parseAndFillDirect(combinedText, box);
+            status.innerText = '✅ माहिती यशस्वीरीत्या भरली!';
         }
 
-        // माहिती शोधून शुद्ध मराठीत भरणारे प्रगत फंक्शन
-        async function parseAndFillDataSmart(text, box) {
-            const rawLines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+        // थेट मराठी व कार्ड माहिती पार्स करणे
+        function parseAndFillDirect(text, box) {
+            const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
 
-            // १. PAN क्रमांक
+            // १. पॅन क्रमांक
             const panMatch = text.match(/[A-Z]{5}[0-9]{4}[A-Z]{1}/);
             if (panMatch && !box.querySelector('.field_pan').value) {
                 box.querySelector('.field_pan').value = panMatch[0];
@@ -355,64 +334,103 @@
                 box.querySelector('.field_mobile').value = mobMatch[0];
             }
 
-            // ४. वय / जन्मतारीख
+            // ४. वय / जन्म तारीख (उदा. 01/01/1963)
             const currentYear = 2026;
-            const dobMatch = text.match(/(?:DOB|Birth|Year)[:\s/]*([0-9]{4}|[0-9]{2}[/-][0-9]{2}[/-][0-9]{4})/i);
+            const dobMatch = text.match(/([0-9]{2}[\/\-][0-9]{2}[\/\-][0-9]{4}|[0-9]{4})/);
             if (dobMatch) {
-                let yearStr = dobMatch[1];
-                if (yearStr.length > 4) yearStr = yearStr.slice(-4);
-                const y = parseInt(yearStr);
+                let yrStr = dobMatch[1];
+                if (yrStr.length > 4) yrStr = yrStr.slice(-4);
+                const y = parseInt(yrStr);
                 if (y > 1920 && y <= currentYear) {
                     box.querySelector('.field_age').value = `वय ${currentYear - y} वर्ष, धंदा- घरकाम`;
                 }
             }
 
-            // ५. पत्ता शोधणे (Address Extraction)
-            const pinMatch = text.match(/\b(4\d{5})\b/);
-            let addressLines = [];
-            let isAddress = false;
-
-            for (let i = 0; i < rawLines.length; i++) {
-                const line = rawLines[i];
-                if (/^(Address|C\/O|S\/O|W\/O|D\/O)/i.test(line) || line.toLowerCase().includes('address:')) {
-                    isAddress = true;
-                    const clean = line.replace(/^(Address|C\/O|S\/O|W\/O|D\/O)[:\s\-]*/gi, '').trim();
-                    if (clean.length > 0) addressLines.push(clean);
-                    continue;
-                }
-                if (isAddress) {
-                    if (/Unique|Authority|www|uidai|\d{4}\s?\d{4}/i.test(line)) continue;
-                    addressLines.push(line);
-                    if (/\b(4\d{5})\b/.test(line) || addressLines.length >= 4) {
+            // ५. थेट मराठी नाव शोधणे (आनंदी पांडुरंग नामदे)
+            for (let i = 0; i < lines.length; i++) {
+                const l = lines[i];
+                if (/भारत|सरकार|Government|India|Unique|Identification|Authority|DOB|जन्म|तारीख|पत्ता|Address|महिला|Female|पुरुष|Male/i.test(l)) continue;
+                
+                // देवनागरी अक्षरे असणारी आणि इंग्रजी नसलेली ओळ
+                if (/[\u0900-\u097F]/.test(l) && !/[a-zA-Z0-9]/.test(l)) {
+                    const words = l.split(/\s+/).filter(w => w.length > 1);
+                    if (words.length >= 2 && words.length <= 4 && l.length >= 6) {
+                        box.querySelector('.field_name').value = l;
                         break;
                     }
                 }
             }
 
-            if (addressLines.length > 0) {
-                const rawAddr = addressLines.join(', ').replace(/\s+/g, ' ');
-                const marathiAddr = await convertToMarathi(rawAddr);
-                box.querySelector('.field_address').value = marathiAddr;
+            // ६. मराठी पत्ता शोधणे
+            const pinMatch = text.match(/\b(4\d{5})\b/);
+            let addressFound = '';
+            for (let i = 0; i < lines.length; i++) {
+                const l = lines[i];
+                if (/^(पत्ता|पता|प्ता|Address|W\/O|S\/O|C\/O|D\/O)/i.test(l) || l.includes('पत्ता:') || l.includes('पता:')) {
+                    addressFound = lines.slice(i, Math.min(i + 4, lines.length)).join(', ')
+                                        .replace(/^(पत्ता|पता|प्ता|Address)[:\s]*/gi, '')
+                                        .replace(/\s+/g, ' ');
+                    break;
+                }
+            }
+
+            if (addressFound) {
+                if (pinMatch && !addressFound.includes(pinMatch[0])) {
+                    addressFound += ', पिन कोड- ' + pinMatch[0];
+                }
+                box.querySelector('.field_address').value = addressFound;
             } else if (pinMatch && !box.querySelector('.field_address').value) {
                 box.querySelector('.field_address').value = 'पिन कोड- ' + pinMatch[0];
             }
+        }
 
-            // ६. संपूर्ण नाव शोधणे
-            if (!box.querySelector('.field_name').value) {
-                for (let i = 0; i < rawLines.length; i++) {
-                    const line = rawLines[i];
-                    if (/Government|India|Unique|Identification|Authority|DOB|Father|Male|Female|Income|Tax|Department/i.test(line)) {
-                        continue;
-                    }
-                    const words = line.split(/\s+/).filter(w => w.length > 1);
-                    if (words.length >= 2 && words.length <= 4 && !/\d/.test(line) && line.length >= 6) {
-                        const marathiName = await convertToMarathi(line);
-                        box.querySelector('.field_name').value = marathiName;
-                        break;
+        // ७. थेट आणि सुरक्षित Word (.docx) डाऊनलोड लॉजिक
+        document.getElementById('plotForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const submitBtn = document.querySelector('.submit-btn');
+            submitBtn.innerText = '⏳ Word दस्त तयार होत आहे...';
+            submitBtn.disabled = true;
+
+            try {
+                const formData = new FormData(this);
+                const response = await fetch('/generate_plot_docx', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) throw new Error('सर्व्हरकडून प्रतिसाद आला नाही');
+
+                let filename = 'PLOT_Kharedipatra.docx';
+                const disposition = response.headers.get('Content-Disposition');
+                if (disposition && disposition.indexOf('filename=') !== -1) {
+                    const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(disposition);
+                    if (matches != null && matches[1]) {
+                        filename = matches[1].replace(/['"]/g, '');
                     }
                 }
+
+                // थेट ब्राऊझर मेमरीतून फाईल डाऊनलोड करणे (Blob Download)
+                const blob = await response.blob();
+                const downloadUrl = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = downloadUrl;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(downloadUrl);
+
+                submitBtn.innerText = '✅ दस्त डाऊनलोड झाला!';
+                setTimeout(() => {
+                    submitBtn.innerText = '📥 Word (.docx) दस्त डाउनलोड करा';
+                    submitBtn.disabled = false;
+                }, 3000);
+            } catch (err) {
+                alert('डाउनलोड करताना त्रुटी आली: ' + err.message);
+                submitBtn.innerText = '📥 Word (.docx) दस्त डाउनलोड करा';
+                submitBtn.disabled = false;
             }
-        }
+        });
     </script>
 </body>
 </html>
