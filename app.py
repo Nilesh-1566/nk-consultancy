@@ -44,10 +44,10 @@ def scan_card_ai():
         महत्त्वाचे: फक्त आणि फक्त JSON आउटपुट द्या. इतर कोणताही मजकूर किंवा स्पष्टीकरण लिहू नका.
         """
 
-        # सक्रिय Gemini 2.5 Flash मॉडेल
+        # Gemini 2.5 Flash मॉडेल वापरून थेट वाचन
         response = client.models.generate_content(
             model='gemini-2.5-flash',
-            contents=[prompt] + images_payload
+            contents=[prompt, *images_payload]
         )
 
         clean_text = response.text.replace('```json', '').replace('```', '').strip()
@@ -55,7 +55,7 @@ def scan_card_ai():
 
         return jsonify(data)
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': f"AI त्रुटी: {str(e)}"}), 500
 
 
 # ३. मुख्य होमपेज
@@ -100,7 +100,7 @@ def generate_plot_docx():
     p_title.alignment = 1
     p_title.add_run("|| श्री ||\n|| खरेदीपत्र ||\n").bold = True
 
-    # प्राथमिक परिच्छेद
+    # प्राथमिक माहिती
     intro = (
         f"तुकडी व जिल्हा {form.get('taluka_dist')} मधील {form.get('village')} या गावाचे नगरपालिका हद्दीतील "
         f"गुंठेवारी नियमितीकरण झालेल्या खुल्या प्लॉट जागेचे व त्यामधील बदिस्थ आर.सी.सी. इमारतीचे मिळकतीचे रक्कम रुपये "
@@ -109,7 +109,7 @@ def generate_plot_docx():
     )
     doc.add_paragraph(intro)
 
-    # १. लिहून घेणार तपशील
+    # १. लिहून घेणार
     g_names = form.getlist('ghenar_name[]')
     g_ages = form.getlist('ghenar_age_occ[]')
     g_addresses = form.getlist('ghenar_address[]')
@@ -126,7 +126,7 @@ def generate_plot_docx():
             f"आ.क्र. {g_aadhars[i] if i < len(g_aadhars) else ''} | पॅन: {g_pans[i] if i < len(g_pans) else ''} | मो.: {g_mobs[i] if i < len(g_mobs) else ''}\n\n"
         )
 
-    # २. लिहून देणार तपशील
+    # २. लिहून देणार
     d_names = form.getlist('denar_name[]')
     d_ages = form.getlist('denar_age_occ[]')
     d_addresses = form.getlist('denar_address[]')
@@ -143,7 +143,7 @@ def generate_plot_docx():
             f"आ.क्र. {d_aadhars[i] if i < len(d_aadhars) else ''} | पॅन: {d_pans[i] if i < len(d_pans) else ''} | मो.: {d_mobs[i] if i < len(d_mobs) else ''}\n\n"
         )
 
-    # ३. संमती / मान्यता देणार (असल्यास)
+    # ३. संमती देणार
     s_names = form.getlist('samati_name[]')
     s_ages = form.getlist('samati_age_occ[]')
     s_addresses = form.getlist('samati_address[]')
@@ -197,7 +197,6 @@ def generate_plot_docx():
         f"म्हणून स्वसंतोषाने व अक्कल हुशारीने लिहून दिले कायम खूष खरेदीपत्र असे सही ता. {form.get('doc_date')} इ."
     )
 
-    # Word फाईल तयार करून डाऊनलोड करणे
     target_stream = io.BytesIO()
     doc.save(target_stream)
     target_stream.seek(0)
