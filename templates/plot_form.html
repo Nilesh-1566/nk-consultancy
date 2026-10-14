@@ -45,7 +45,7 @@
 <body>
 
     <div class="header">
-        <h2>प्लॉट खरेदीपत्र मसुदा (AI ऑटोमॅटिक)</h2>
+        <h2>प्लॉट खरेदीपत्र मसुदा (AI तंत्रज्ञान)</h2>
         <p style="font-size:13px; color:#cbd5e1; margin-top:4px;">NK CONSULTANCY दस्त नोंदणी प्रणाली</p>
     </div>
 
@@ -202,6 +202,7 @@
         </form>
     </div>
 
+    <!-- फंक्शनॅलिटी स्क्रिप्ट -->
     <script>
         let counter = 1;
 
@@ -266,20 +267,50 @@
             document.getElementById('area_preview').innerText = 'दस्त मसुद्यात नोंद: ' + formatted;
         }
 
-        // Google Gemini AI द्वारे कार्ड वाचन
+        // फोटो कॉम्प्रेस करण्याचे फंक्शन
+        function compressImageForAI(file) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let w = img.width;
+                    let h = img.height;
+                    const maxDim = 1200;
+                    if (w > maxDim || h > maxDim) {
+                        if (w > h) {
+                            h = Math.round((h * maxDim) / w);
+                            w = maxDim;
+                        } else {
+                            w = Math.round((w * maxDim) / h);
+                            h = maxDim;
+                        }
+                    }
+                    canvas.width = w;
+                    canvas.height = h;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, w, h);
+                    canvas.toBlob((blob) => resolve(blob), 'image/jpeg', 0.85);
+                };
+                img.src = URL.createObjectURL(file);
+            });
+        }
+
+        // Google Gemini AI कडे कॉम्प्रेस केलेला हलका फोटो पाठवणे
         async function uploadCardAI(input, boxId) {
             if (!input.files || input.files.length === 0) return;
             const status = document.getElementById('status_' + boxId);
             const box = document.getElementById(boxId);
 
-            status.innerText = '⚡ AI कार्ड वाचत आहे... कृपया २ सेकंद थांबा.';
+            status.innerText = '⚡ फोटो तयार होत आहे व AI कडे पाठवत आहे...';
 
             const formData = new FormData();
             for (let i = 0; i < input.files.length; i++) {
-                formData.append('card_files', input.files[i]);
+                const compressedBlob = await compressImageForAI(input.files[i]);
+                formData.append('card_files', compressedBlob, `card_${i}.jpg`);
             }
 
             try {
+                status.innerText = '⚡ AI कार्ड वाचत आहे... कृपया ५-१० सेकंद थांबा.';
                 const res = await fetch('/scan_card_ai', {
                     method: 'POST',
                     body: formData
@@ -287,8 +318,8 @@
 
                 const data = await res.json();
 
-                if (data.error) {
-                    status.innerText = 'त्रुटी: ' + data.error;
+                if (!res.ok || data.error) {
+                    status.innerText = 'त्रुटी: ' + (data.error || 'सर्व्हर कोड ' + res.status);
                     return;
                 }
 
@@ -302,11 +333,11 @@
 
                 status.innerText = '✅ माहिती १००% अचूक भरली गेली आहे!';
             } catch (err) {
-                status.innerText = 'सर्व्हरशी संपर्क होऊ शकला नाही. कृपया पुन्हा प्रयत्न करा.';
+                status.innerText = 'तांत्रिक त्रुटी: ' + err.message + ' (कृपया १० सेकंदांनंतर पुन्हा प्रयत्न करा)';
             }
         }
 
-        // Word (.docx) थेट डाऊनलोड
+        // थेट Word (.docx) डाऊनलोड लॉजिक
         document.getElementById('plotForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const submitBtn = document.querySelector('.submit-btn');
@@ -341,13 +372,13 @@
                 a.remove();
                 window.URL.revokeObjectURL(downloadUrl);
 
-                submitBtn.innerText = '✅ दस्त यशस्वीरीत्या डाऊनलोड झाला!';
+                submitBtn.innerText = '✅ दस्त डाऊनलोड झाला!';
                 setTimeout(() => {
                     submitBtn.innerText = '📥 Word (.docx) दस्त डाउनलोड करा';
                     submitBtn.disabled = false;
                 }, 3000);
             } catch (err) {
-                alert('डाऊनलोड करताना त्रुटी आली: ' + err.message);
+                alert('डाऊनलोड त्रुटी: ' + err.message);
                 submitBtn.innerText = '📥 Word (.docx) दस्त डाउनलोड करा';
                 submitBtn.disabled = false;
             }
