@@ -1,140 +1,57 @@
 from flask import Flask, render_template, request, send_file, jsonify, redirect, url_for
 from docx import Document
-from PIL import Image
+from docx.shared import Inches, Pt, RGBColor
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.oxml import OxmlElement
+from docx.oxml.ns import qn
 import os
 import io
-import json
-import base64
-import requests
-import urllib.parse
 
 app = Flask(__name__)
 
-# १. Gemini API Key कॉन्फिगरेशन
-GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "AQ.Ab8RN6LqhXJUZBYHwOTyxDAeTHuGRfCbhk-YiPdeOlj62xdc7g")
-
-
-# २. थेट Google Gemini REST API द्वारे अचूक कार्ड वाचन
-@app.route('/scan_card_ai', methods=['POST'])
-def scan_card_ai():
-    try:
-        if 'card_files' not in request.files:
-            return jsonify({'error': 'कोणताही फोटो निवडलेला नाही'}), 400
-
-        files = request.files.getlist('card_files')
-        if not files or files[0].filename == '':
-            return jsonify({'error': 'फोटो फाईल रिकामी आहे'}), 400
-
-        # फोटोंना Base64 मध्ये रूपांतरित करणे
-        parts = []
-        for f in files:
-            img_bytes = f.read()
-            encoded_img = base64.b64encode(img_bytes).decode('utf-8')
-            parts.append({
-                "inline_data": {
-                    "mime_type": f.mimetype or "image/jpeg",
-                    "data": encoded_img
-                }
-            })
-
-        prompt_text = """
-        या आधार कार्ड किंवा पॅन कार्डच्या फोटोंचे काळजीपूर्वक वाचन करा.
-        खालील माहिती अचूकपणे ओळखून फक्त वैध JSON फॉरमॅटमध्ये द्या:
-        {
-          "name": "व्यक्तीचे मूळ संपूर्ण नाव शुद्ध देवनागरी मराठीत (उदा. आनंदी पांडुरंग नामदे)",
-          "age": "व्यक्तीचे वय वर्षामध्ये (उदा. वय 63 वर्ष, धंदा- घरकाम)",
-          "address": "आधार कार्डच्या मागील बाजूचा संपूर्ण पत्ता शुद्ध मराठीत पिनकोडसह (उदा. W/O: पांडुरंग भाऊ नामदे, नरंदे मार्ग, वठार तर्फ उदगांव, वडगाव, कोल्हापूर, महाराष्ट्र, पिन कोड- 416112)",
-          "aadhar": "12 अंकी आधार क्रमांक स्पेससह (उदा. xxxx xxxx xxxx)",
-          "pan": "10 अंकी इंग्रजी पॅन क्रमांक (पॅन कार्ड असल्यास)",
-          "mobile": "मोबाईल नंबर (कार्डवर आढळल्यास)"
-        }
-        महत्त्वाचे: फक्त आणि फक्त JSON आउटपुट द्या. इतर कोणताही मजकूर किंवा स्पष्टीकरण लिहू नका.
-        """
-        parts.append({"text": prompt_text})
-
-        headers = {'Content-Type': 'application/json'}
-        payload = {"contents": [{"parts": parts}]}
-
-        # Google Gemini सक्रिय मॉडेल्सची यादी (फॉलबॅकसह)
-        models_to_try = [
-            "gemini-2.0-flash",
-            "gemini-1.5-flash-8b",
-            "gemini-1.5-pro"
-        ]
-
-        api_res = None
-        last_error_text = ""
-
-        for model_name in models_to_try:
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={GEMINI_API_KEY}"
-            try:
-                res = requests.post(url, headers=headers, data=json.dumps(payload), timeout=40)
-                if res.status_code == 200:
-                    api_res = res
-                    break
-                else:
-                    last_error_text = res.text
-            except Exception as ex:
-                last_error_text = str(ex)
-                continue
-
-        if not api_res:
-            return jsonify({'error': f"Google AI कडून त्रुटी: {last_error_text}"}), 500
-
-        res_json = api_res.json()
-        raw_text = res_json['candidates'][0]['content']['parts'][0]['text']
-
-        clean_text = raw_text.replace('```json', '').replace('```', '').strip()
-        data = json.loads(clean_text)
-
-        return jsonify(data)
-    except Exception as e:
-        return jsonify({'error': f"तांत्रिक त्रुटी: {str(e)}"}), 500
-
-
-# ३. मुख्य होमपेज
+# १. मुख्य होमपेज
 @app.route('/')
 def home():
     return render_template('home.html')
 
-
-# ४. दस्त मसुदा मेनू
+# २. दस्त मसुदा मेनू
 @app.route('/draft')
 def draft():
     return render_template('draft_menu.html')
 
-
-# ५. खरेदीखत उप-मेनू
+# ३. खरेदीखत उप-मेनू
 @app.route('/kharedi_menu')
 def kharedi_menu():
     return render_template('kharedi_menu.html')
 
-
-# ६. प्लॉट खरेदीपत्र डेटा नोंदणी फॉर्म
+# ४. प्लॉट खरेदीपत्र फॉर्म
 @app.route('/plot_draft')
 def plot_draft():
     return render_template('plot_form.html')
 
+# ५. करारपत्र TO खरेदीपत्र फॉर्म
+@app.route('/karar_to_kharedi_draft')
+def karar_to_kharedi_draft():
+    return render_template('karar_to_kharedi_form.html')
 
-# ७. सामान्य फॉर्म
+# ६. सामान्य फॉर्म
 @app.route('/draft_form')
 def draft_form():
     doc_type = request.args.get('type', '')
+    if doc_type == 'करार TO खरेदीपत्र':
+        return redirect(url_for('karar_to_kharedi_draft'))
     return render_template('index.html', selected_type=doc_type)
 
-
-# ८. Word (.docx) दस्त निर्मिती व डाऊनलोड
+# ७. प्लॉट खरेदीपत्र Word निर्मिती
 @app.route('/generate_plot_docx', methods=['POST'])
 def generate_plot_docx():
     form = request.form
     doc = Document()
 
-    # शीर्षक
     p_title = doc.add_paragraph()
-    p_title.alignment = 1
+    p_title.alignment = WD_ALIGN_PARAGRAPH.CENTER
     p_title.add_run("|| श्री ||\n|| खरेदीपत्र ||\n").bold = True
 
-    # प्राथमिक माहिती
     intro = (
         f"तुकडी व जिल्हा {form.get('taluka_dist')} मधील {form.get('village')} या गावाचे नगरपालिका हद्दीतील "
         f"गुंठेवारी नियमितीकरण झालेल्या खुल्या प्लॉट जागेचे व त्यामधील बदिस्थ आर.सी.सी. इमारतीचे मिळकतीचे रक्कम रुपये "
@@ -143,7 +60,6 @@ def generate_plot_docx():
     )
     doc.add_paragraph(intro)
 
-    # १. लिहून घेणार
     g_names = form.getlist('ghenar_name[]')
     g_ages = form.getlist('ghenar_age_occ[]')
     g_addresses = form.getlist('ghenar_address[]')
@@ -160,7 +76,6 @@ def generate_plot_docx():
             f"आ.क्र. {g_aadhars[i] if i < len(g_aadhars) else ''} | पॅन: {g_pans[i] if i < len(g_pans) else ''} | मो.: {g_mobs[i] if i < len(g_mobs) else ''}\n\n"
         )
 
-    # २. लिहून देणार
     d_names = form.getlist('denar_name[]')
     d_ages = form.getlist('denar_age_occ[]')
     d_addresses = form.getlist('denar_address[]')
@@ -177,26 +92,6 @@ def generate_plot_docx():
             f"आ.क्र. {d_aadhars[i] if i < len(d_aadhars) else ''} | पॅन: {d_pans[i] if i < len(d_pans) else ''} | मो.: {d_mobs[i] if i < len(d_mobs) else ''}\n\n"
         )
 
-    # ३. संमती देणार
-    s_names = form.getlist('samati_name[]')
-    s_ages = form.getlist('samati_age_occ[]')
-    s_addresses = form.getlist('samati_address[]')
-    s_aadhars = form.getlist('samati_aadhar[]')
-    s_pans = form.getlist('samati_pan[]')
-    s_mobs = form.getlist('samati_mobile[]')
-
-    if s_names and any(s.strip() for s in s_names):
-        p_samati = doc.add_paragraph()
-        p_samati.add_run("संमती / मान्यता देणार:\n").bold = True
-        for i in range(len(s_names)):
-            if s_names[i].strip():
-                p_samati.add_run(
-                    f"{i+1}) {s_names[i]}, {s_ages[i] if i < len(s_ages) else ''}\n"
-                    f"{s_addresses[i] if i < len(s_addresses) else ''}\n"
-                    f"आ.क्र. {s_aadhars[i] if i < len(s_aadhars) else ''} | पॅन: {s_pans[i] if i < len(s_pans) else ''} | मो.: {s_mobs[i] if i < len(s_mobs) else ''}\n\n"
-                )
-
-    # ४. मिळकतीचे वर्णन
     milkat = (
         f"कारणे लिहून देतो खरेदीपत्र ऐसाजे की,\n"
         f"1) मिळकतीचे वर्णन:- \n"
@@ -210,28 +105,13 @@ def generate_plot_docx():
         f"पश्चिमेस :- {form.get('west')} \n"
         f"दक्षिणेस :- {form.get('south')} \n"
         f"उत्तरेस :- {form.get('north')} \n\n"
-        f"येणेप्रमाणे चतुःसिमेतील मिळकत सर्व व या मिळकतीमध्ये असलेली जल, तरू, काष्ट, पाषाण, निधी-निक्षेप, तसेच जाणे-येणेच्या हक्कासह, आदी तदंगभूत "
-        f"वस्तूसहची गुंठेवारी नियमितीकरण झालेली खुली मिळकत व त्यातील रो बंगलो मिळकत हि या खरेदीपत्राचा विषय आहे.\n\n"
         f"2) मोबदला व भरणा तपशील:-\n"
-        f"खरेदी मोबदल्याची एकूण रक्कम रुपये {form.get('amount_num')} (अक्षरी रुपये {form.get('amount_words')}) असून त्याचा तपशील खालीलप्रमाणे:\n"
+        f"खरेदी मोबदल्याची एकूण रक्कम रुपये {form.get('amount_num')} (अक्षरी रुपये {form.get('amount_words')})\n\n"
+        f"3) या खरेदीपत्राने आजपासून खरेदी घेणार यांनी वर वर्णन केलेल्या मिळकतीचे पूर्णपणे मालक व कब्जेदार वहिवाटदार झाला आहात.\n"
+        f"म्हणून स्वसंतोषाने व अक्कल हुशारीने लिहून दिले कायम खूष खरेदीपत्र असे सही ता. {form.get('doc_date')} इ."
     )
     doc.add_paragraph(milkat)
 
-    # ५. भरणा नोंदी
-    pay_amts = form.getlist('pay_amt[]')
-    pay_modes = form.getlist('pay_mode[]')
-    pay_banks = form.getlist('pay_bank[]')
-    p_pay = doc.add_paragraph()
-    for i in range(len(pay_amts)):
-        if pay_amts[i].strip():
-            p_pay.add_run(f"({i+1}) रक्कम रुपये {pay_amts[i]} - {pay_modes[i] if i < len(pay_modes) else ''} द्वारे {pay_banks[i] if i < len(pay_banks) else ''}. भरणा पावती निराळी नाही.\n")
-
-    doc.add_paragraph(
-        f"\n3) या खरेदीपत्राने आजपासून खरेदी घेणार यांनी वर वर्णन केलेल्या हक्कासह सर्व मिळकतीचे पूर्णपणे मालक व कब्जेदार वहिवाटदार झाला आहात.\n"
-        f"म्हणून स्वसंतोषाने व अक्कल हुशारीने लिहून दिले कायम खूष खरेदीपत्र असे सही ता. {form.get('doc_date')} इ."
-    )
-
-    # Word फाईल तयार करून डाऊनलोड करणे
     target_stream = io.BytesIO()
     doc.save(target_stream)
     target_stream.seek(0)
@@ -239,7 +119,6 @@ def generate_plot_docx():
     gat_no_clean = str(form.get('gat_no', '87')).replace('/', '_').replace(' ', '_')
     plot_no_clean = str(form.get('plot_no', '26')).replace('/', '_').replace(' ', '_')
     first_ghenar = str(g_names[0]).strip().replace(' ', '_') if g_names else "Ghenar"
-
     filename = f"PLOT_Kharedipatra_Gat_{gat_no_clean}_Plot_{plot_no_clean}_{first_ghenar}.docx"
 
     return send_file(
@@ -249,17 +128,148 @@ def generate_plot_docx():
         mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     )
 
+# ८. करारपत्र TO खरेदीपत्र Word निर्मिती (नवीन अचूक फॉरमॅट)
+@app.route('/generate_karar_to_kharedi_docx', methods=['POST'])
+def generate_karar_to_kharedi_docx():
+    f = request.form
+    doc = Document()
+
+    # मथळा
+    p_head = doc.add_paragraph()
+    p_head.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    r1 = p_head.add_run("|| श्री स्वामी समर्थ ||\n|| खरेदीपत्र ||\n")
+    r1.bold = True
+    r1.font.size = Pt(14)
+
+    # प्राथमिक माहिती
+    p_intro = doc.add_paragraph()
+    p_intro.paragraph_format.line_spacing = 1.15
+    p_intro.add_run(
+        f"रजि. करारपत्र दस्त नं.{f.get('karar_dast_no')}, दि.{f.get('karar_date')} इ.रोजीच्या दस्तावरून खरेदीपत्र "
+        f"{f.get('village_taluka')} येथील मिळकतीचे सरकारी बाजारभावाप्रमाणे रक्कम रुपये {f.get('amount_num')} "
+        f"(अक्षरी रक्कम रुपये {f.get('amount_words')}) दि. {f.get('doc_date')} इसवीचे.\n\n"
+    )
+
+    # खरेदी घेणार
+    p_ghenar = doc.add_paragraph()
+    p_ghenar.add_run(
+        f"{f.get('ghenar_name')}, {f.get('ghenar_age_occ')},\n"
+        f"{f.get('ghenar_address')}\t\t\t\t\t\t\t\tखरेदी घेणार\n"
+        f"आ.नं.- {f.get('ghenar_aadhar')}  पॅन नं.- {f.get('ghenar_pan')}\n\n"
+    )
+
+    # खरेदी देणार व वटमुखत्यार
+    p_denar = doc.add_paragraph()
+    p_denar.add_run(
+        f"{f.get('denar_name')}, {f.get('denar_age_occ')},\n"
+        f"{f.get('denar_address')}\n"
+        f"आ.नं.- {f.get('denar_aadhar')}\t\t\t\t\t\t\t\tखरेदी देणार\n"
+        f"        यांचे तर्फे वटमुखत्यार म्हणून \n"
+        f"{f.get('poa_name')}, {f.get('poa_age_occ')},\n"
+        f"{f.get('poa_address')}\n"
+        f"आ.नं.- {f.get('poa_aadhar')}  पॅन नं.- {f.get('poa_pan')}\n\n"
+        f"कारणे मी लिहून देतो करारपत्रावरून खरेदीपत्र ऐसाजे की,\n"
+    )
+
+    # भरणा तपशील तक्ता
+    doc.add_paragraph("भरणा तपशील :").runs[0].bold = True
+    pay_amts = f.getlist('pay_amt[]')
+    pay_words = f.getlist('pay_words[]')
+    pay_banks = f.getlist('pay_bank[]')
+    pay_modes = f.getlist('pay_mode[]')
+
+    table = doc.add_table(rows=1, cols=3)
+    table.style = 'Table Grid'
+    hdr = table.rows[0].cells
+    hdr[0].text = "अ.नं."
+    hdr[1].text = "रक्कम रुपये"
+    hdr[2].text = "तपशील"
+
+    total_calc = 0
+    for i in range(len(pay_amts)):
+        row = table.add_row().cells
+        row[0].text = str(i + 1)
+        row[1].text = pay_amts[i]
+        row[2].text = (
+            f"अक्षरी रुपये {pay_words[i] if i < len(pay_words) else ''}. खरेदी घेणार यांनी खरेदी देणार यांचे नांवे असणाऱ्या "
+            f"{pay_banks[i] if i < len(pay_banks) else ''} बँकमध्ये {pay_modes[i] if i < len(pay_modes) else ''} करारपत्र दस्त नं.{f.get('karar_dast_no')}, "
+            f"दि.{f.get('karar_date')} इ.रोजी करारपत्रामध्ये नमूद केले भरणेप्रमाणे घेतलेला आहे. ते आम्हाला मान्य व कबूल आहे."
+        )
+
+    # एकूण भरणा
+    row_tot = table.add_row().cells
+    row_tot[0].text = "एकूण"
+    row_tot[1].text = f.get('amount_num')
+    row_tot[2].text = f"अक्षरी रुपये {f.get('amount_words')}."
+
+    # मिळकत वर्णन व अटी
+    p_body = doc.add_paragraph()
+    p_body.paragraph_format.line_spacing = 1.15
+    p_body.add_run(
+        f"\nयेणे प्रमाणे वर दिलेल्या भरण्याप्रमाणे वर नमूद रुपयाच्या मोबदल्यात तुम्हांस {f.get('village_taluka')} येथील मिळकत करारपत्रावरून खरेदीपत्र लिहून देतो ती {f.get('dist_division')}, "
+        f"पोट तुकडी तालुका {f.get('sub_registrar')} मे. दुय्यम निबंधकसो, {f.get('sub_registrar')} यांचेकडील दस्त नं.{f.get('karar_dast_no')}, दि.{f.get('karar_date')} इ.रोजीचे करारपत्राने लिहून दिलेली मिळकत आजरोजी या दस्ताने लिहून देतो. तिचे वर्णन खालीलप्रमाणे :-\n"
+        f"\tगट नंबर {f.get('gat_no')} क्षेत्र {f.get('total_area')} या पुरे नंबरची जमीन असून यापैकी क्षेत्र {f.get('sold_area')} ची मिळकत सर्व. यासी चतु:सीमा :-\n"
+        f"पूर्वेस :- {f.get('east')} \n"
+        f"पश्चीमेस :- {f.get('west')} \n"
+        f"दक्षिणेस :- {f.get('south')} \n"
+        f"उत्तरेस :- {f.get('north')} \n"
+        f"\tयेणेप्रमाणे चतु:सीमेतील मिळकत तदंगभूत वस्तूसह व इजमेंटरीच्या हक्कासह सर्व.\n\n"
+        f"\tयेणेप्रमाणे वरील चतु:सीमेतील मिळकत मी तुम्हांस मे.दुय्यम निबंधकसो, {f.get('sub_registrar')} यांचेकडील दस्त नं. {f.get('karar_dast_no')}, दि.{f.get('karar_date')} इ. रोजीच्या करारपत्राने रक्कम रुपये {f.get('amount_num')} रुपयास कायम व खूष खरेदी देणेचे रजि. करारपत्र करून दिला असून सदरची मिळकतीचा कब्जा आजरोजी शांततामय असले स्थितीत कबजेत वहिवाटीस दिलेला आहे. तरी सदर तुम्हांस खरेदी दिलेल्या मिळकतीचा सरकारी आकार फाळा, फंड, शिक्षण कर, जो बसेल तो तुमचा तुम्ही परभारे मालकीने देत जाऊन सदर मिळकतीचा वहिवाट तुम्ही व तुमचे पुत्र पौत्रादी, वंशपरंपरा, निरंतर, निधी-निक्षेप, जलतरू, काष्ठ-पाषाण, तदंगभूत वस्तूसह व इजमेंटचे हक्कासह कायमपणे मालकीने वहिवाट करावी. आता सदर तुम्हांस खरेदी दिले मिळकतीवर माझा अगर माझे हरएक प्रकारचे वारसांचा हक्क, दावा अगर संबंध बिलकुल राहिलेला नाही. सर्व प्रकारे संपूर्ण मालकी तुमची झालेली आहे. मिळकतीसंबंधी सरकारी, सावकारी, भाऊबंदकी वगैरे कोणतेही प्रकारचे लागलिगाड आलेस किंवा खाल खटला आलेस ते मी माझे स्वखर्चाने परस्पर निवारण करून देऊ. तुम्हांस त्याची तोशिष लागू देणार नाही. मिळकतीचे खाते या लेखा आधारे तुम्ही तुमच्या नांवे करून घ्यावे. त्याबाबत आवश्यक त्या ठिकाणी लागणाऱ्या सह्या मी माझे खर्चाने येऊन देणार आहे. त्याची तोशिष लागू देणार नाही. सदरची मिळकत निर्वेध व निष्कर्जी आहे. या लेखास अनुसरून काही दुरुस्ती लेख, प्रतिज्ञापत्र वगैरे करून द्यावे लागलेस ते मी विना मोबदला करून देईन. मी तुम्हांस तुमच्या नांवे करारपत्राप्रमाणे कायमखूष खरेदी करून दिलेली आहे. भरणा सदरी लिहिले प्रमाणे मला मान्य व कबूल असून माझी कोणत्याही प्रकारची तक्रार किंवा हरकत नाही. सदरची मिळकत आजरोजी निर्वेध व निष्कर्जी असून पूर्ण रयतावा आहे.\n\n"
+        f"\tसदर मिळकतीचे सिद्धगणाप्रमाणे रक्कम रुपये {f.get('amount_num')} इतकी झाली असून रजि.करार दस्त नं. {f.get('karar_dast_no')}, दि.{f.get('karar_date')} इ.रोजी रक्कम रुपये {f.get('amount_num')} मु.शु.र.रु.{f.get('old_stamp')} व नोंदणी फी १% रक्कम रुपये {f.get('old_reg_fee')} भरलेली आहे. आजरोजी मु.शु.{f.get('new_stamp')} व नोंदणी फी {f.get('new_reg_fee')} चा लावून सदर दस्त पुरा केलेला आहे.\n\n"
+        f"\tसदरचे खरेदीपत्र मी सांगितलेप्रमाणे तयार केले असून ते मी अव्वलपासून अखेरपर्यंत वाचून पहिले असून सदर दस्तामधील मजकूर मला मान्य व कबूल आहे. म्हणून मी साक्षीदारांच्या समक्ष माझी स्वाक्षरी करून सदरचे खरेदीपत्र पूर्ण केले आहे. सदरचे खरेदीपत्र मला व माझे सर्व प्रकारच्या इस्टेट वारसांस लागू असून बंधनकारक आहे.\n\n"
+        f"\tम्हणून, लिहून दिले स्वखुषीने, अक्कल हुशारीने खरेदीपत्र सही तारीख :- {f.get('doc_date')} इ.\n"
+    )
+
+    # स्वाक्षरी तक्ता
+    doc.add_paragraph("खरेदीपत्र लिहून घेणार :").runs[0].bold = True
+    t_g = doc.add_table(rows=2, cols=4)
+    t_g.style = 'Table Grid'
+    h_g = t_g.rows[0].cells
+    h_g[0].text = "अ.नं."
+    h_g[1].text = "नांव"
+    h_g[2].text = "छायाचित्र"
+    h_g[3].text = "सही / अंगठा"
+    r_g = t_g.rows[1].cells
+    r_g[0].text = "०१"
+    r_g[1].text = f"{f.get('ghenar_name')}"
+
+    doc.add_paragraph("\nखरेदीपत्र लिहून देणार :").runs[0].bold = True
+    t_d = doc.add_table(rows=2, cols=4)
+    t_d.style = 'Table Grid'
+    h_d = t_d.rows[0].cells
+    h_d[0].text = "अ.नं."
+    h_d[1].text = "नांव"
+    h_d[2].text = "छायाचित्र"
+    h_d[3].text = "सही / अंगठा"
+    r_d = t_d.rows[1].cells
+    r_d[0].text = "०१"
+    r_d[1].text = f"{f.get('denar_name')} यांचे तर्फे वटमुखत्यार म्हणून {f.get('poa_name')}"
+
+    p_sakshi = doc.add_paragraph("\n\nसाक्षीदार :-\n1) ……………………………………………\t\t2) ……………………………………………")
+
+    target_stream = io.BytesIO()
+    doc.save(target_stream)
+    target_stream.seek(0)
+
+    ghenar_clean = str(f.get('ghenar_name', 'Ghenar')).replace(' ', '_').replace('.', '')
+    gat_clean = str(f.get('gat_no', '')).replace('/', '_')
+    filename = f"KARARPATRA_TO_KHAREDIPATRA_Gat_{gat_clean}_{ghenar_clean}.docx"
+
+    return send_file(
+        target_stream,
+        as_attachment=True,
+        download_name=filename,
+        mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    )
 
 # ९. IGR व संपर्क Routes
 @app.route('/igr')
 def igr():
     return render_template('igr.html')
 
-
 @app.route('/contact')
 def contact():
     return render_template('contact.html')
-
 
 if __name__ == '__main__':
     app.run(debug=True)
