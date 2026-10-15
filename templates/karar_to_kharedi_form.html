@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>करारपत्र TO खरेदीपत्र मसुदा</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #f1f5f9; padding-bottom: 60px; }
+        .header { background: #090d16; color: #d4af37; padding: 42px 16px 20px; text-align: center; border-bottom: 3px solid #d4af37; }
+        .header h2 { font-size: 22px; color: #f59e0b; }
+        .container { max-width: 720px; margin: 20px auto; padding: 0 16px; }
+        .card { background: white; border-radius: 12px; padding: 18px; margin-bottom: 16px; border: 1px solid #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.04); }
+        h3 { font-size: 16px; color: #1e293b; margin-bottom: 12px; border-left: 4px solid #d4af37; padding-left: 8px; }
+        label { display: block; font-size: 13px; font-weight: 600; color: #475569; margin-top: 10px; margin-bottom: 3px; }
+        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; }
+        .party-box { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 16px; margin-bottom: 16px; position: relative; }
+        .btn-add { background: #0f766e; color: white; border: none; padding: 9px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 6px; }
+        .btn-remove { background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 5px; font-size: 12px; float: right; cursor: pointer; }
+        .submit-btn { width: 100%; background: linear-gradient(135deg, #d4af37, #b8860b); color: white; border: none; padding: 15px; font-size: 16px; font-weight: bold; border-radius: 10px; margin-top: 25px; cursor: pointer; box-shadow: 0 4px 10px rgba(184, 134, 11, 0.35); }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h2>करारपत्र वरून खरेदीपत्र मसुदा</h2>
+        <p style="font-size:13px; color:#cbd5e1; margin-top:4px;">NK CONSULTANCY दस्त नोंदणी प्रणाली</p>
+    </div>
+
+    <div class="container">
+        <form id="kararForm">
+
+            <!-- १. पूर्वीचे करारपत्र संदर्भ -->
+            <div class="card">
+                <h3>१. पूर्वीच्या नोंदणीकृत करारपत्राचा संदर्भ</h3>
+                <label>करारपत्र दस्त क्रमांक:</label>
+                <input type="text" name="karar_dast_no" value="6710" required>
+
+                <label>करारपत्र दिनांक:</label>
+                <input type="text" name="karar_date" value="31/07/2024" required>
+
+                <label>दुय्यम निबंधक कार्यालय:</label>
+                <input type="text" name="sub_registrar" value="हातकणंगले" required>
+            </div>
+
+            <!-- २. चालू दस्त व रक्कम तपशील -->
+            <div class="card">
+                <h3>२. चालू दस्त व रक्कम तपशील</h3>
+                <label>आजचा खरेदीपत्र दिनांक:</label>
+                <input type="text" name="doc_date" value="01/06/2026" required>
+
+                <label>मिळकतीचे गाव व तालुका:</label>
+                <input type="text" name="village_taluka" value="आळते, ता.हातकणंगले" required>
+
+                <label>जिल्हा व तुकडी:</label>
+                <input type="text" name="dist_division" value="जिल्हा व तुकडी कोल्हापूर" required>
+
+                <label>खरेदी रक्कम (अंकी रु.):</label>
+                <input type="text" name="amount_num" value="3,00,000/-" required>
+
+                <label>खरेदी रक्कम अक्षरी:</label>
+                <input type="text" name="amount_words" value="तीन लाख फक्त" required>
+            </div>
+
+            <!-- ३. खरेदी घेणारा -->
+            <div class="card">
+                <h3>३. खरेदी घेणारा (लिहून घेणार)</h3>
+                <label>संपूर्ण नाव (मराठीत):</label>
+                <input type="text" name="ghenar_name" value="सौ. अनिता पुंडलिक बिरंजे" required>
+
+                <label>वय व धंदा:</label>
+                <input type="text" name="ghenar_age_occ" value="वय 38 वर्षे, धंदा- गृहिणी" required>
+
+                <label>पत्ता व पिनकोड:</label>
+                <textarea name="ghenar_address" rows="2" required>रा.कसबा आळते, ता.हातकणंगले, जि.कोल्हापूर, पिनकोड- 416109</textarea>
+
+                <label>आधार क्रमांक:</label>
+                <input type="text" name="ghenar_aadhar" placeholder="xxxx xxxx xxxx" required>
+
+                <label>पॅन नंबर:</label>
+                <input type="text" name="ghenar_pan" value="DNFPB7229K">
+            </div>
+
+            <!-- ४. खरेदी देणारा -->
+            <div class="card">
+                <h3>४. खरेदी देणारा (मूळ मालक)</h3>
+                <label>मूळ मालकाचे संपूर्ण नाव:</label>
+                <input type="text" name="denar_name" value="श्री.महमदशफी अब्बास मेवेकरी" required>
+
+                <label>वय व धंदा:</label>
+                <input type="text" name="denar_age_occ" value="वय 47 वर्षे, धंदा-शेती" required>
+
+                <label>पत्ता:</label>
+                <textarea name="denar_address" rows="2" required>रा.कसबा आळते, ता.हातकणंगले, जि.कोल्हापूर</textarea>
+
+                <label>आधार क्रमांक:</label>
+                <input type="text" name="denar_aadhar" placeholder="xxxx xxxx xxxx" required>
+            </div>
+
+            <!-- ५. वटमुखत्यार तपशील -->
+            <div class="card">
+                <h3>५. खरेदी देणारा यांचे तर्फे वटमुखत्यार (POA Holder)</h3>
+                <label>वटमुखत्याराचे संपूर्ण नाव:</label>
+                <input type="text" name="poa_name" value="सौ. अनिता पुंडलिक बिरंजे" required>
+
+                <label>वय व धंदा:</label>
+                <input type="text" name="poa_age_occ" value="वय 38 वर्षे, धंदा- गृहिणी" required>
+
+                <label>पत्ता:</label>
+                <textarea name="poa_address" rows="2" required>रा. कसबा आळते, ता.हातकणंगले, जि.कोल्हापूर</textarea>
+
+                <label>आधार क्रमांक:</label>
+                <input type="text" name="poa_aadhar" placeholder="xxxx xxxx xxxx" required>
+
+                <label>पॅन नंबर:</label>
+                <input type="text" name="poa_pan" value="DNFPB7229K">
+            </div>
+
+            <!-- ६. भरणा तपशील -->
+            <div class="card">
+                <h3>६. भरणा तपशील</h3>
+                <div id="payment_container">
+                    <div class="party-box" id="pay_0">
+                        <label>रक्कम रु.:</label>
+                        <input type="text" name="pay_amt[]" value="1,00,000/-" required>
+                        <label>रक्कम अक्षरी:</label>
+                        <input type="text" name="pay_words[]" value="एक लाख फक्त" required>
+                        <label>तपशील / बँक नाव:</label>
+                        <input type="text" name="pay_bank[]" value="कुरुंदवाड अर्बन बँक शाखा – हातकणंगले">
+                        <label>माध्यम (आरटीजीएस/चेक/डीडी):</label>
+                        <input type="text" name="pay_mode[]" value="आरटीजीएसने">
+                    </div>
+                    <div class="party-box" id="pay_1">
+                        <label>रक्कम रु.:</label>
+                        <input type="text" name="pay_amt[]" value="2,00,000/-" required>
+                        <label>रक्कम अक्षरी:</label>
+                        <input type="text" name="pay_words[]" value="दोन लाख फक्त" required>
+                        <label>तपशील / बँक नाव:</label>
+                        <input type="text" name="pay_bank[]" value="कुरुंदवाड अर्बन बँक शाखा – हातकणंगले">
+                        <label>माध्यम (आरटीजीएस/चेक/डीडी):</label>
+                        <input type="text" name="pay_mode[]" value="आरटीजीएसने">
+                    </div>
+                </div>
+                <button type="button" class="btn-add" onclick="addPayment()">+ आणखी भरणा नोंद जोडा</button>
+            </div>
+
+            <!-- ७. मिळकतीचे वर्णन व चतुःसीमा -->
+            <div class="card">
+                <h3>७. मिळकतीचे वर्णन व चतुःसीमा</h3>
+                <label>गट नंबर:</label>
+                <input type="text" name="gat_no" value="309" required>
+
+                <label>एकूण क्षेत्र व आकार:</label>
+                <input type="text" name="total_area" value="0 हे 17 आर आकार 0 रुपये 41 पैसे" required>
+
+                <label>खरेदी दिलेले क्षेत्र व आकार:</label>
+                <input type="text" name="sold_area" value="0 हे 03 आर 01 पॉ. आकार 0 रुपये 01 पैसे" required>
+
+                <label>पूर्वेस:</label>
+                <input type="text" name="east" value="पांडुरंग बापू माळी यांची जमीन" required>
+                <label>पश्चिमेस:</label>
+                <input type="text" name="west" value="याच गटातील खरेदी घेणार यांची जमीन" required>
+                <label>दक्षिणेस:</label>
+                <input type="text" name="south" value="माळी व पायशेट्टी यांची जमीन" required>
+                <label>उत्तरेस:</label>
+                <input type="text" name="north" value="गट नंबर 303 मधील खरेदी घेणार यांची जमीन" required>
+            </div>
+
+            <!-- ८. मुद्रांक शुल्क व फी तपशील -->
+            <div class="card">
+                <h3>८. भरलेले मुद्रांक शुल्क व नोंदणी फी</h3>
+                <label>करारपत्रावेळी भरलेले मुद्रांक शुल्क (रु.):</label>
+                <input type="text" name="old_stamp" value="18,000 /-" required>
+
+                <label>करारपत्रावेळी भरलेली नोंदणी फी (रु.):</label>
+                <input type="text" name="old_reg_fee" value="3,000 /-" required>
+
+                <label>आजरोजी भरलेले मुद्रांक शुल्क (रु.):</label>
+                <input type="text" name="new_stamp" value="500/-" required>
+
+                <label>आजरोजी भरलेली नोंदणी फी (रु.):</label>
+                <input type="text" name="new_reg_fee" value="200 /-" required>
+            </div>
+
+            <button type="submit" class="submit-btn">📥 Word (.docx) दस्त डाउनलोड करा</button>
+        </form>
+    </div>
+
+    <script>
+        let payCounter = 2;
+        function addPayment() {
+            const id = 'pay_' + payCounter++;
+            const container = document.getElementById('payment_container');
+            const div = document.createElement('div');
+            div.className = 'party-box';
+            div.id = id;
+            div.innerHTML = `
+                <button type="button" class="btn-remove" onclick="document.getElementById('${id}').remove()">काढून टाका ✕</button>
+                <label>रक्कम रु.:</label>
+                <input type="text" name="pay_amt[]" placeholder="उदा. 1,00,000/-" required>
+                <label>रक्कम अक्षरी:</label>
+                <input type="text" name="pay_words[]" placeholder="उदा. एक लाख फक्त" required>
+                <label>तपशील / बँक नाव:</label>
+                <input type="text" name="pay_bank[]" placeholder="बँकेचे नाव व शाखा">
+                <label>माध्यम:</label>
+                <input type="text" name="pay_mode[]" placeholder="उदा. आरटीजीएसने / चेकने">
+            `;
+            container.appendChild(div);
+        }
+
+        document.getElementById('kararForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const submitBtn = document.querySelector('.submit-btn');
+            submitBtn.innerText = '⏳ Word दस्त तयार होत आहे...';
+            submitBtn.disabled = true;
+
+            try {
+                const formData = new FormData(this);
+                const response = await fetch('/generate_karar_to_kharedi_docx', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) throw new Error('सर्व्हर प्रतिसाद देत नाही');
+
+                let filename = 'KARARPATRA_TO_KHAREDIPATRA.docx';
+                const disposition = response.headers.get('Content-Disposition');
+                if (disposition && disposition.indexOf('filename=') !== -1) {
+                    const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(disposition);
+                    if (matches != null && matches[1]) filename = matches[1].replace(/['"]/g, '');
+                }
+
+                const blob = await response.blob();
+                const downloadUrl = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = downloadUrl;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(downloadUrl);
+
+                submitBtn.innerText = '✅ दस्त डाऊनलोड झाला!';
+                setTimeout(() => {
+                    submitBtn.innerText = '📥 Word (.docx) दस्त डाउनलोड करा';
+                    submitBtn.disabled = false;
+                }, 3000);
+            } catch (err) {
+                alert('डाऊनलोड त्रुटी: ' + err.message);
+                submitBtn.innerText = '📥 Word (.docx) दस्त डाउनलोड करा';
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
