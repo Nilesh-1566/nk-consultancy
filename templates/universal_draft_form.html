@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>दस्त मसुदा डेटा नोंदणी</title>
+    <!-- OCR व PDF वाचनासाठी लायब्ररी -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #f1f5f9; padding-bottom: 60px; }
+        .header { background: #090d16; color: #d4af37; padding: 36px 16px 18px; text-align: center; border-bottom: 3px solid #d4af37; }
+        .header h2 { font-size: 22px; color: #f59e0b; }
+        .container { max-width: 740px; margin: 20px auto; padding: 0 16px; }
+        .card { background: white; border-radius: 12px; padding: 18px; margin-bottom: 16px; border: 1px solid #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.04); }
+        h3 { font-size: 16px; color: #1e293b; margin-bottom: 12px; border-left: 4px solid #d4af37; padding-left: 8px; }
+        label { display: block; font-size: 13px; font-weight: 600; color: #475569; margin-top: 10px; margin-bottom: 4px; }
+        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background: #fff; }
+        
+        .special-box { border: 2px dashed #059669; background: #ecfdf5; padding: 14px; border-radius: 10px; margin-bottom: 16px; }
+        .party-card { background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 16px; margin-bottom: 18px; position: relative; }
+        .upload-section { margin-bottom: 15px; }
+        .upload-box { border: 1.5px dashed #0284c7; background: #f0f9ff; padding: 10px; border-radius: 8px; margin-bottom: 8px; text-align: center; }
+        .upload-box span { font-size: 13px; font-weight: 700; color: #0369a1; display: block; margin-bottom: 4px; }
+        .upload-box input[type="file"] { border: none; background: transparent; padding: 0; font-size: 12px; }
+        
+        .status-txt { font-size: 12.5px; color: #0284c7; margin-top: 6px; font-weight: bold; }
+        .btn-add { background: #0f766e; color: white; border: none; padding: 10px 18px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 8px; width: 100%; }
+        .btn-remove { background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 5px; font-size: 12px; float: right; cursor: pointer; }
+        .submit-btn { width: 100%; background: linear-gradient(135deg, #d4af37, #b8860b); color: white; border: none; padding: 15px; font-size: 16px; font-weight: bold; border-radius: 10px; margin-top: 25px; cursor: pointer; box-shadow: 0 4px 10px rgba(184, 134, 11, 0.35); }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h2 id="page_title">दस्त मसुदा डेटा नोंदणी</h2>
+        <p style="font-size:13px; color:#cbd5e1; margin-top:4px;">NK CONSULTANCY दस्त नोंदणी प्रणाली</p>
+    </div>
+
+    <div class="container">
+        <form id="universalForm">
+
+            <!-- १. दस्त प्रकार व बँक निवड -->
+            <div class="card">
+                <h3>१. दस्ताचा प्रकार व पर्याय</h3>
+                <label>दस्त प्रकार निवडा:*</label>
+                <select name="doc_type" id="doc_type_select" onchange="handleDocTypeChange()" required>
+                    <option value="प्लॉट खरेदीपत्र">१) प्लॉट खरेदीपत्र</option>
+                    <option value="शेती खरेदीपत्र">२) शेती खरेदीपत्र</option>
+                    <option value="CTS खरेदीपत्र">३) CTS खरेदीपत्र (घरजागा)</option>
+                    <option value="करार TO खरेदीपत्र">४) करारपत्र वरून खरेदीपत्र</option>
+                    <option value="विनामोबदला हक्कसोडपत्र">५) विनामोबदला हक्कसोडपत्र</option>
+                    <option value="विनामोबदला बक्षीसपत्र">६) विनामोबदला बक्षीसपत्र</option>
+                    <option value="तारण गहाणखत">७) तारण गहाणखत (Mortgage)</option>
+                    <option value="चुकदुरुस्ती लेख">८) चुकदुरुस्ती लेख</option>
+                    <option value="रद्द न होणारे वटमुखत्यारपत्र">९) रद्द न होणारे वटमुखत्यारपत्र</option>
+                </select>
+
+                <!-- तारण गहाणखतासाठी बँक निवड -->
+                <div id="bank_select_box" style="display:none; margin-top:12px;">
+                    <label style="color:#059669;">बँक / पतसंस्था निवडा:*</label>
+                    <select name="selected_bank" id="selected_bank" onchange="fillBankDetails()">
+                        <option value="श्री दत्त नागरी सहकारी पतसंस्था मर्या हातकणंगले">श्री दत्त नागरी सहकारी पतसंस्था मर्या हातकणंगले</option>
+                        <option value="कुरुंदवाड अर्बन बँक शाखा हातकणंगले">कुरुंदवाड अर्बन बँक शाखा हातकणंगले</option>
+                        <option value="इतर बँक / पतसंस्था">इतर बँक / पतसंस्था</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- करारपत्र TO खरेदीपत्र साठी जुना INDEX-II अपलोड -->
+            <div id="index_upload_container" class="special-box" style="display:none;">
+                <span style="font-size:14px; font-weight:bold; color:#065f46;">📄 जुना INDEX-II (करारपत्र) PDF / फोटो अपलोड करा:</span><br>
+                <input type="file" accept="image/*,.pdf" onchange="readIndexFile(this)" style="margin-top:6px;">
+                <div class="status-txt" id="status_index"></div>
+            </div>
+
+            <!-- २. प्राथमिक दस्त तपशील -->
+            <div class="card">
+                <h3>२. दस्त व मिळकत प्राथमिक माहिती</h3>
+                <label>दस्त दिनांक:</label>
+                <input type="text" name="doc_date" id="doc_date" value="01/06/2026" required>
+
+                <label>मिळकतीचे गाव व तालुका:</label>
+                <input type="text" name="village_taluka" id="village_taluka" value="आळते, ता.हातकणंगले" required>
+
+                <label>जिल्हा व तुकडी:</label>
+                <input type="text" name="dist_division" value="जिल्हा व तुकडी कोल्हापूर" required>
+
+                <label>व्यवहार / मूल्यांकन / कर्ज रक्कम (अंकी रु.):</label>
+                <input type="text" name="amount_num" id="amount_num" value="3,00,000/-" required>
+
+                <label>रक्कम अक्षरी:</label>
+                <input type="text" name="amount_words" id="amount_words" value="तीन लाख फक्त" required>
+
+                <!-- तारण गहाणखतासाठी जादा माहिती -->
+                <div id="mortgage_extra_fields" style="display:none;">
+                    <label>संस्थेचे चेअरमन / प्रतिनिधी नाव:</label>
+                    <input type="text" name="bank_rep_name" id="bank_rep_name" value="विद्यमान चेअरमन">
+                    <label>मीटिंग सभा व ठराव नंबर:</label>
+                    <input type="text" name="bank_meeting_res" id="bank_meeting_res" value="सभा नं. 02 ठराव नं. 08 दि. 04/05/2026">
+                    <label>व्याजाचा दर (द.सा.द.शे.):</label>
+                    <input type="text" name="bank_interest" id="bank_interest" value="13%">
+                    <label>कर्ज मुदत (महिने):</label>
+                    <input type="text" name="bank_tenure" id="bank_tenure" value="120 महिने (10 वर्षे)">
+                </div>
+
+                <!-- करारपत्राचा संदर्भ (करार TO खरेदीसाठी) -->
+                <div id="karar_extra_fields" style="display:none;">
+                    <label>करारपत्र दस्त क्रमांक व तारीख:</label>
+                    <input type="text" name="karar_ref" id="karar_ref" value="दस्त नं. 6710, दि. 31/07/2024">
+                </div>
+            </div>
+
+            <!-- ३. एकसमान पक्षकार नोंदणी (देणार, घेणार, मान्यता देणार, वटमुखत्यार, जामीनदार) -->
+            <div class="card">
+                <h3>👥 ३. पक्षकारांची संपूर्ण माहिती</h3>
+                <div id="parties_container">
+                    
+                    <!-- पहिला पक्षकार -->
+                    <div class="party-card" id="party_0">
+                        <div class="upload-section">
+                            <div class="upload-box">
+                                <span>१. आधार समोर (Front)</span>
+                                <input type="file" accept="image/*,.pdf" onchange="readCardOCR(this, 'party_0')">
+                            </div>
+                            <div class="upload-box">
+                                <span>२. आधार मागील बाजू (पत्ता)</span>
+                                <input type="file" accept="image/*,.pdf" onchange="readCardOCR(this, 'party_0')">
+                            </div>
+                            <div class="upload-box">
+                                <span>३. पॅन कार्ड समोर</span>
+                                <input type="file" accept="image/*,.pdf" onchange="readCardOCR(this, 'party_0')">
+                            </div>
+                            <div class="status-txt" id="status_party_0"></div>
+                        </div>
+
+                        <label>पक्षकाराचा प्रकार निवडा:*</label>
+                        <select name="party_role[]" required>
+                            <option value="लिहून घेणार">लिहून घेणार (खरेदी घेणारा / बँक)</option>
+                            <option value="लिहून देणार">लिहून देणार (खरेदी देणारा / कर्जदार)</option>
+                            <option value="मान्यता देणार">मान्यता देणार / संमती देणार</option>
+                            <option value="लिहून देणार यांच्या तर्फे वटमुखत्यार">लिहून देणार यांच्या तर्फे वटमुखत्यार</option>
+                            <option value="जामीनदार">जामीनदार</option>
+                            <option value="साक्षीदार">साक्षीदार</option>
+                        </select>
+
+                        <label>संपूर्ण नाव (मराठीत):*</label>
+                        <input type="text" name="party_name[]" class="field_name" placeholder="उदा. अनिता पुंडलिक बिरंजे" required>
+
+                        <label>वय (वर्षे):*</label>
+                        <input type="text" name="party_age[]" class="field_age" placeholder="उदा. वय 38 वर्षे">
+
+                        <label>धंदा:*</label>
+                        <input type="text" name="party_occ[]" class="field_occ" placeholder="उदा. घरकाम / शेती / व्यवसाय">
+
+                        <label>संपूर्ण पत्ता व पिनकोड (मराठीत):*</label>
+                        <textarea name="party_address[]" class="field_address" rows="2" placeholder="रा. --, ता. --, जि. --, पिन कोड- --" required></textarea>
+
+                        <label>ओळख क्रमांक (आधार):</label>
+                        <input type="text" name="party_aadhar[]" class="field_aadhar" placeholder="xxxx xxxx xxxx">
+
+                        <label>पॅन नंबर:</label>
+                        <input type="text" name="party_pan[]" class="field_pan" placeholder="PAN Number">
+
+                        <label>मोबाईल नंबर:</label>
+                        <input type="text" name="party_mobile[]" class="field_mobile" placeholder="मोबाईल नंबर">
+                    </div>
+                </div>
+
+                <button type="button" class="btn-add" onclick="addNewParty()">+ आणखी पक्षकार जोडा</button>
+            </div>
+
+            <!-- ४. मिळकतीचे वर्णन व चतुःसीमा -->
+            <div class="card">
+                <h3>४. मिळकतीचे वर्णन व चतुःसीमा</h3>
+                <label>गट नंबर / सि.स.नं. / मालमत्ता क्र.:</label>
+                <input type="text" name="gat_no" id="gat_no" value="309" required>
+
+                <label>एकूण क्षेत्र व आकार:</label>
+                <input type="text" name="total_area" id="total_area" value="0 हे 17 आर आकार 0 रुपये 41 पैसे" required>
+
+                <label>व्यवहाराचे / खरेदी क्षेत्र व आकार:</label>
+                <input type="text" name="sold_area" id="sold_area" value="0 हे 03 आर 01 पॉ. आकार 0 रुपये 01 पैसे" required>
+
+                <label>पूर्वेस:</label>
+                <input type="text" name="east" id="east" value="रस्ता" required>
+                <label>पश्चिमेस:</label>
+                <input type="text" name="west" id="west" value="मिळकत" required>
+                <label>दक्षिणेस:</label>
+                <input type="text" name="south" id="south" value="मिळकत" required>
+                <label>उत्तरेस:</label>
+                <input type="text" name="north" id="north" value="रस्ता" required>
+            </div>
+
+            <!-- ५. भरणा तपशील -->
+            <div class="card">
+                <h3>५. भरणा तपशील (लागू असल्यास)</h3>
+                <div id="payment_container">
+                    <div class="party-card" id="pay_0">
+                        <label>रक्कम रु.:</label>
+                        <input type="text" name="pay_amt[]" placeholder="उदा. 1,00,000/-">
+                        <label>रक्कम अक्षरी:</label>
+                        <input type="text" name="pay_words[]" placeholder="उदा. एक लाख फक्त">
+                        <label>बँक नाव व शाखा:</label>
+                        <input type="text" name="pay_bank[]" placeholder="बँकेचे नाव व शाखा">
+                        <label>माध्यम (चेक/RTGS/डीडी):</label>
+                        <input type="text" name="pay_mode[]" placeholder="RTGS ने / चेक नं.">
+                    </div>
+                </div>
+                <button type="button" class="btn-add" style="background:#0284c7;" onclick="addPayment()">+ आणखी भरणा नोंद जोडा</button>
+            </div>
+
+            <button type="submit" class="submit-btn">📥 Word (.docx) दस्त डाउनलोड करा</button>
+        </form>
+    </div>
+
+    <script>
+        let partyCounter = 1;
+        let payCounter = 1;
+
+        // दस्त प्रकार बदलताच फील्ड्स चालू/बंद करणे
+        function handleDocTypeChange() {
+            const docType = document.getElementById('doc_type_select').value;
+            document.getElementById('page_title').innerText = docType + ' मसुदा';
+
+            // तारण गहाणखत पर्याय
+            if (docType === 'तारण गहाणखत') {
+                document.getElementById('bank_select_box').style.display = 'block';
+                document.getElementById('mortgage_extra_fields').style.display = 'block';
+                fillBankDetails();
+            } else {
+                document.getElementById('bank_select_box').style.display = 'none';
+                document.getElementById('mortgage_extra_fields').style.display = 'none';
+            }
+
+            // करारपत्र TO खरेदीपत्र पर्याय
+            if (docType === 'करार TO खरेदीपत्र') {
+                document.getElementById('index_upload_container').style.display = 'block';
+                document.getElementById('karar_extra_fields').style.display = 'block';
+            } else {
+                document.getElementById('index_upload_container').style.display = 'none';
+                document.getElementById('karar_extra_fields').style.display = 'none';
+            }
+        }
+
+        // बँक निवडताच बँकेचे नियम भरणे
+        function fillBankDetails() {
+            const bank = document.getElementById('selected_bank').value;
+            if (bank.includes('दत्त')) {
+                document.getElementById('bank_rep_name').value = 'विद्यमान चेअरमन श्री दत्त नागरी पतसंस्था';
+                document.getElementById('bank_meeting_res').value = 'सभा नं. 02 ठराव नं. 08 दि. 04/05/2026 (नोंदणी क्र. 402/83/84)';
+                document.getElementById('bank_interest').value = '13%';
+                document.getElementById('bank_tenure').value = '120 महिने (10 वर्षे)';
+            }
+        }
+
+        // नवीन पक्षकार बॉक्स जोडणे
+        function addNewParty() {
+            const id = 'party_' + partyCounter++;
+            const container = document.getElementById('parties_container');
+            const div = document.createElement('div');
+            div.className = 'party-card';
+            div.id = id;
+            div.innerHTML = `
+                <button type="button" class="btn-remove" onclick="document.getElementById('${id}').remove()">काढून टाका ✕</button>
+                <div class="upload-section">
+                    <div class="upload-box">
+                        <span>१. आधार समोर (Front)</span>
+                        <input type="file" accept="image/*,.pdf" onchange="readCardOCR(this, '${id}')">
+                    </div>
+                    <div class="upload-box">
+                        <span>२. आधार मागील बाजू (पत्ता)</span>
+                        <input type="file" accept="image/*,.pdf" onchange="readCardOCR(this, '${id}')">
+                    </div>
+                    <div class="upload-box">
+                        <span>३. पॅन कार्ड समोर</span>
+                        <input type="file" accept="image/*,.pdf" onchange="readCardOCR(this, '${id}')">
+                    </div>
+                    <div class="status-txt" id="status_${id}"></div>
+                </div>
+
+                <label>पक्षकाराचा प्रकार निवडा:*</label>
+                <select name="party_role[]" required>
+                    <option value="लिहून देणार">लिहून देणार</option>
+                    <option value="लिहून घेणार">लिहून घेणार</option>
+                    <option value="मान्यता देणार">मान्यता देणार / संमती देणार</option>
+                    <option value="लिहून देणार यांच्या तर्फे वटमुखत्यार">लिहून देणार यांच्या तर्फे वटमुखत्यार</option>
+                    <option value="जामीनदार">जामीनदार</option>
+                    <option value="साक्षीदार">साक्षीदार</option>
+                </select>
+
+                <label>संपूर्ण नाव (मराठीत):*</label>
+                <input type="text" name="party_name[]" class="field_name" required>
+
+                <label>वय (वर्षे):*</label>
+                <input type="text" name="party_age[]" class="field_age">
+
+                <label>धंदा:*</label>
+                <input type="text" name="party_occ[]" class="field_occ" placeholder="घरकाम / शेती / व्यवसाय">
+
+                <label>संपूर्ण पत्ता व पिनकोड (मराठीत):*</label>
+                <textarea name="party_address[]" class="field_address" rows="2" required></textarea>
+
+                <label>ओळख क्रमांक (आधार):</label>
+                <input type="text" name="party_aadhar[]" class="field_aadhar">
+
+                <label>पॅन नंबर:</label>
+                <input type="text" name="party_pan[]" class="field_pan">
+
+                <label>मोबाईल नंबर:</label>
+                <input type="text" name="party_mobile[]" class="field_mobile">
+            `;
+            container.appendChild(div);
+        }
+
+        function addPayment() {
+            const id = 'pay_' + payCounter++;
+            const container = document.getElementById('payment_container');
+            const div = document.createElement('div');
+            div.className = 'party-card';
+            div.id = id;
+            div.innerHTML = `
+                <button type="button" class="btn-remove" onclick="document.getElementById('${id}').remove()">काढून टाका ✕</button>
+                <label>रक्कम रु.:</label>
+                <input type="text" name="pay_amt[]" placeholder="उदा. 1,00,000/-">
+                <label>रक्कम अक्षरी:</label>
+                <input type="text" name="pay_words[]" placeholder="उदा. एक लाख फक्त">
+                <label>बँक नाव व शाखा:</label>
+                <input type="text" name="pay_bank[]" placeholder="बँकेचे नाव व शाखा">
+                <label>माध्यम:</label>
+                <input type="text" name="pay_mode[]" placeholder="RTGS / चेक">
+            `;
+            container.appendChild(div);
+        }
+
+        // Google Transliterate API (मराठीत रूपांतर)
+        async function toMarathi(text) {
+            if (!text || text.trim() === '') return text;
+            try {
+                const words = text.trim().split(/\s+/);
+                const converted = await Promise.all(words.map(async (w) => {
+                    const clean = w.replace(/[^A-Za-z]/g, '');
+                    if (clean.length < 2) return w;
+                    const res = await fetch(`https://inputtools.google.com/request?text=${encodeURIComponent(clean)}&itc=mr-t-i0-und&num=1`);
+                    const data = await res.json();
+                    if (data && data[0] === 'SUCCESS' && data[1] && data[1][0] && data[1][0][1]) {
+                        return data[1][0][1][0];
+                    }
+                    return w;
+                }));
+                return converted.join(' ');
+            } catch (e) {
+                return text;
+            }
+        }
+
+        // जुनी INDEX-II वाचून माहिती भरणे
+        async function readIndexFile(input) {
+            if (!input.files || !input.files[0]) return;
+            const status = document.getElementById('status_index');
+            status.innerText = 'Index-II तपासत आहे... कृपया थांबा.';
+
+            try {
+                let imageBlob = input.files[0];
+                if (input.files[0].type === 'application/pdf') {
+                    const arrayBuffer = await input.files[0].arrayBuffer();
+                    const pdf = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
+                    const page = await pdf.getPage(1);
+                    const viewport = page.getViewport({scale: 1.5});
+                    const canvas = document.createElement('canvas');
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
+                    await page.render({canvasContext: canvas.getContext('2d'), viewport: viewport}).promise;
+                    imageBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg'));
+                }
+
+                const res = await Tesseract.recognize(imageBlob, 'eng+mar');
+                const text = res.data.text;
+
+                const dastMatch = text.match(/(?:दस्त\s*क्रमांक|Doc\s*No|दस्त\s*नं)[:\s.]*([0-9]{3,6})/i);
+                if (dastMatch) document.getElementById('karar_ref').value = 'दस्त नं. ' + dastMatch[1];
+
+                const gatMatch = text.match(/(?:गट\s*क्रमांक|गट\s*नं|Gat\s*No)[:\s.]*([0-9]+)/i);
+                if (gatMatch) document.getElementById('gat_no').value = gatMatch[1];
+
+                const amtMatch = text.match(/(?:बाजारभाव|मोबदला|रक्कम|Market\s*Value)[:\s.रुRs]*([0-9,]{5,10})/i);
+                if (amtMatch) document.getElementById('amount_num').value = amtMatch[1] + '/-';
+
+                status.innerText = '✅ Index-II मधील तपशील यशस्वीरीत्या भरला!';
+            } catch (err) {
+                status.innerText = 'Index वाचता आला नाही: ' + err.message;
+            }
+        }
+
+        // कार्ड फोटो स्कॅन
+        async function readCardOCR(input, partyBoxId) {
+            if (!input.files || !input.files[0]) return;
+            const status = document.getElementById('status_' + partyBoxId);
+            const box = document.getElementById(partyBoxId);
+            status.innerText = 'कार्ड वाचत आहे...';
+
+            try {
+                const res = await Tesseract.recognize(input.files[0], 'eng');
+                const text = res.data.text;
+
+                const pan = text.match(/[A-Z]{5}[0-9]{4}[A-Z]{1}/);
+                if (pan) box.querySelector('.field_pan').value = pan[0];
+
+                const aadhar = text.match(/\b\d{4}\s?\d{4}\s?\d{4}\b/);
+                if (aadhar) box.querySelector('.field_aadhar').value = aadhar[0];
+
+                const yob = text.match(/(?:DOB|Birth|Year)[:\s/]*([0-9]{4})/i);
+                if (yob) {
+                    const y = parseInt(yob[1]);
+                    if (y > 1920 && y <= 2026) box.querySelector('.field_age').value = `वय ${2026 - y} वर्षे`;
+                }
+
+                // नाव शोधून Google द्वारे शुद्ध मराठी करणे
+                const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+                for (let i = 0; i < lines.length; i++) {
+                    const l = lines[i].replace(/[^A-Za-z\s]/g, '').trim();
+                    if (/Government|India|Unique|Authority|DOB|Father|Female|Male|Income|Tax|Address/i.test(l)) continue;
+                    const words = l.split(/\s+/).filter(w => w.length >= 2);
+                    const isTitleCase = words.length >= 2 && words.every(w => /^[A-Z][a-z]+\$/.test(w));
+                    if (isTitleCase && words.length <= 4 && l.length >= 7) {
+                        const mName = await toMarathi(l);
+                        box.querySelector('.field_name').value = mName;
+                        break;
+                    }
+                }
+
+                status.innerText = '✅ माहिती फॉर्ममध्ये भरली!';
+            } catch (e) {
+                status.innerText = 'कार्ड वाचताना अडचण आली.';
+            }
+        }
+
+        // Word दस्त डाऊनलोड करणे
+        document.getElementById('universalForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const submitBtn = document.querySelector('.submit-btn');
+            submitBtn.innerText = '⏳ Word दस्त तयार होत आहे...';
+            submitBtn.disabled = true;
+
+            try {
+                const formData = new FormData(this);
+                const response = await fetch('/generate_universal_docx', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) throw new Error('सर्व्हर प्रतिसाद देत नाही');
+
+                let filename = 'Draft_Document.docx';
+                const disposition = response.headers.get('Content-Disposition');
+                if (disposition && disposition.indexOf('filename=') !== -1) {
+                    const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(disposition);
+                    if (matches != null && matches[1]) filename = matches[1].replace(/['"]/g, '');
+                }
+
+                const blob = await response.blob();
+                const downloadUrl = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = downloadUrl;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(downloadUrl);
+
+                submitBtn.innerText = '✅ दस्त डाऊनलोड झाला!';
+                setTimeout(() => {
+                    submitBtn.innerText = '📥 Word (.docx) दस्त डाउनलोड करा';
+                    submitBtn.disabled = false;
+                }, 3000);
+            } catch (err) {
+                alert('डाऊनलोड त्रुटी: ' + err.message);
+                submitBtn.innerText = '📥 Word (.docx) दस्त डाउनलोड करा';
+                submitBtn.disabled = false;
+            }
+        });
+
+        // सुरुवातीला फॉर्म प्रकार तपासणे
+        window.onload = function() {
+            handleDocTypeChange();
+        };
+    </script>
+</body>
+</html>
