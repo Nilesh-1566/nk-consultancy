@@ -22,7 +22,7 @@ def draft():
 def kharedi_menu():
     return render_template('kharedi_menu.html')
 
-# ४. मूळ नावाने थेट फॉर्म उघडणारे डायनॅमिक Route
+# ४. मूळ नावाने थेट अचूक फॉर्म उघडणारे Routes
 @app.route('/draft_form')
 def draft_form():
     doc_type = request.args.get('type', 'प्लॉट खरेदीपत्र')
@@ -38,6 +38,9 @@ def karar_to_kharedi_draft():
 
 # ५. Word (.docx) दस्त थेट तयार करून डाऊनलोड देणे
 @app.route('/generate_custom_docx', methods=['POST'])
+@app.route('/generate_universal_docx', methods=['POST'])
+@app.route('/generate_plot_docx', methods=['POST'])
+@app.route('/generate_karar_to_kharedi_docx', methods=['POST'])
 def generate_custom_docx():
     f = request.form
     doc_title = f.get('doc_title', 'खरेदीपत्र')
@@ -81,7 +84,7 @@ def generate_custom_docx():
             sakshi_list.append(item)
 
     # -------------------------------------------------------------
-    # १. तारण गहाणखत मसुदा
+    # १. तारण गहाणखत मसुदा (पतसंस्था)
     # -------------------------------------------------------------
     if 'तारण' in doc_title or 'गहाण' in doc_title:
         p_head = doc.add_paragraph()
@@ -152,7 +155,7 @@ def generate_custom_docx():
         )
 
     # -------------------------------------------------------------
-    # ३. इतर सर्व दस्त (प्लॉट, शेती, सीटीएस खरेदीखत, हक्कसोड, बक्षीसपत्र, इ.)
+    # ३. इतर सर्व दस्त (प्लॉट, शेती, सीटीएस खरेदीपत्र, हक्कसोड, बक्षीसपत्र, इ.)
     # -------------------------------------------------------------
     else:
         p_head = doc.add_paragraph()
@@ -190,7 +193,6 @@ def generate_custom_docx():
             f"येणेप्रमाणे {doc_title} स्वखुषीने लिहून दिले असे सही दि. {f.get('doc_date')}."
         )
 
-    # Word फाईल मेमरीमध्ये साठवून डाऊनलोड पाठवणे
     target_stream = io.BytesIO()
     doc.save(target_stream)
     target_stream.seek(0)
