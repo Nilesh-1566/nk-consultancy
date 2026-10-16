@@ -3,138 +3,297 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>दस्त प्रकार - NK Consultancy</title>
+    <title>{{ doc_title }} मसुदा</title>
+    <!-- OCR व PDF वाचनासाठी लायब्ररी -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #f1f5f9; padding-bottom: 40px; }
+        body { background-color: #f1f5f9; padding-bottom: 60px; }
+        .header { background: #090d16; color: #d4af37; padding: 36px 16px 18px; text-align: center; border-bottom: 3px solid #d4af37; }
+        .header h2 { font-size: 22px; color: #f59e0b; font-weight: 800; }
+        .container { max-width: 740px; margin: 20px auto; padding: 0 16px; }
+        .card { background: white; border-radius: 12px; padding: 18px; margin-bottom: 16px; border: 1px solid #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.04); }
+        h3 { font-size: 16px; color: #1e293b; margin-bottom: 12px; border-left: 4px solid #d4af37; padding-left: 8px; }
+        label { display: block; font-size: 13px; font-weight: 600; color: #475569; margin-top: 10px; margin-bottom: 4px; }
+        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background: #fff; }
         
-        .header {
-            background: linear-gradient(180deg, #090d16 0%, #172033 100%);
-            color: #d4af37;
-            padding: 50px 16px 20px;
-            text-align: center;
-            border-bottom: 3px solid #d4af37;
-        }
-        .header h1 { font-size: 22px; color: #f59e0b; }
-        .header p { color: #f8fafc; font-size: 13px; margin-top: 4px; }
-
-        .container { max-width: 650px; margin: 20px auto; padding: 0 16px; }
+        .special-box { border: 2px dashed #059669; background: #ecfdf5; padding: 14px; border-radius: 10px; margin-bottom: 16px; text-align: center; }
+        .party-card { background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 16px; margin-bottom: 18px; position: relative; }
         
-        .section-title {
-            font-size: 16px;
-            font-weight: 700;
-            color: #1e293b;
-            margin: 20px 0 10px 0;
-            border-left: 4px solid #d4af37;
-            padding-left: 8px;
-        }
-
-        .grid-container {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-        }
-
-        .doc-btn {
-            display: flex;
-            align-items: center;
-            background: #ffffff;
-            border: 1px solid #cbd5e1;
-            border-radius: 12px;
-            padding: 14px 12px;
-            text-decoration: none;
-            color: #0f172a;
-            font-size: 14.5px;
-            font-weight: 600;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
-            transition: transform 0.1s ease;
-        }
-        .doc-btn:active {
-            transform: scale(0.97);
-            background-color: #f8fafc;
-        }
-        .icon { font-size: 22px; margin-right: 10px; }
-
-        .back-btn {
-            display: block;
-            text-align: center;
-            margin-top: 30px;
-            padding: 12px;
-            background: #d4af37;
-            color: #ffffff;
-            text-decoration: none;
-            border-radius: 10px;
-            font-weight: bold;
-        }
+        /* ३ स्वतंत्र अपलोड बॉक्सेस */
+        .upload-section { margin-bottom: 15px; }
+        .upload-box { border: 1.5px dashed #0284c7; background: #f0f9ff; padding: 10px; border-radius: 8px; margin-bottom: 8px; text-align: center; }
+        .upload-box span { font-size: 13px; font-weight: 700; color: #0369a1; display: block; margin-bottom: 4px; }
+        .upload-box input[type="file"] { border: none; background: transparent; padding: 0; font-size: 12px; }
+        
+        .status-txt { font-size: 12.5px; color: #0284c7; margin-top: 6px; font-weight: bold; }
+        .btn-add { background: #0f766e; color: white; border: none; padding: 10px 18px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 8px; width: 100%; }
+        .btn-remove { background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 5px; font-size: 12px; float: right; cursor: pointer; }
+        .submit-btn { width: 100%; background: linear-gradient(135deg, #d4af37, #b8860b); color: white; border: none; padding: 15px; font-size: 16px; font-weight: bold; border-radius: 10px; margin-top: 25px; cursor: pointer; box-shadow: 0 4px 10px rgba(184, 134, 11, 0.35); }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <h1>दस्त मसुदा (Drafting)</h1>
-        <p>खालीलपैकी दस्ताचा प्रकार निवडा</p>
+        <h2>{{ doc_title }}</h2>
+        <p style="font-size:13px; color:#cbd5e1; margin-top:4px;">NK CONSULTANCY दस्त नोंदणी प्रणाली</p>
     </div>
 
     <div class="container">
 
-        <!-- १. हस्तांतरण व मालकी हक्क दस्त -->
-        <div class="section-title">१. हस्तांतरण व मालकी हक्क दस्त</div>
-        <div class="grid-container">
-            <!-- खरेदीखतावर क्लिक केल्यास ४ उप-पर्यायांचे पान उघडेल -->
-            <a href="/kharedi_menu" class="doc-btn"><span class="icon">📜</span>खरेदीखत (Sale Deed)</a>
-            <a href="/draft_form?type=बक्षीसपत्र" class="doc-btn"><span class="icon">🎁</span>बक्षीसपत्र (Gift Deed)</a>
-            <a href="/draft_form?type=हक्कसोडपत्र" class="doc-btn"><span class="icon">🤝</span>हक्कसोडपत्र (Release Deed)</a>
-            <a href="/draft_form?type=वाटपपत्र" class="doc-btn"><span class="icon">⚖️</span>वाटपपत्र (Partition Deed)</a>
-            <a href="/draft_form?type=अदलाबदल दस्त" class="doc-btn"><span class="icon">🔄</span>अदलाबदल दस्त (Exchange)</a>
-            <a href="/draft_form?type=संमतीपत्र" class="doc-btn"><span class="icon">✍️</span>संमतीपत्र (Consent Deed)</a>
+        <!-- करारपत्र वरून खरेदीपत्र असल्यास जुना INDEX-II अपलोड पर्याय -->
+        {% if 'करार' in doc_title %}
+        <div class="special-box">
+            <span style="font-size:15px; font-weight:bold; color:#065f46;">📄 जुना INDEX-II (करारपत्र) PDF / फोटो अपलोड करा:</span><br>
+            <span style="font-size:12px; color:#047857;">(अपलोड करताच करारपत्र क्रमांक, तारीख व मिळकत माहिती आपोआप भरली जाईल)</span><br>
+            <input type="file" accept="image/*,.pdf" onchange="readIndexFile(this)" style="margin-top:8px;">
+            <div class="status-txt" id="status_index"></div>
         </div>
+        {% endif %}
 
-        <!-- २. मुखत्यारपत्र -->
-        <div class="section-title">२. मुखत्यारपत्र (Power of Attorney)</div>
-        <div class="grid-container">
-            <a href="/draft_form?type=कुलमुखत्यारपत्र" class="doc-btn"><span class="icon">📑</span>कुलमुखत्यारपत्र (GPA)</a>
-            <a href="/draft_form?type=विशेष मुखत्यारपत्र" class="doc-btn"><span class="icon">📄</span>विशेष मुखत्यारपत्र (SPA)</a>
-            <a href="/draft_form?type=मुखत्यारपत्र रद्दबातल" class="doc-btn"><span class="icon">🚫</span>अधिकार रद्दबातल पत्र</a>
-        </div>
+        <form id="docForm" action="/generate_custom_docx" method="POST">
+            <input type="hidden" name="doc_title" value="{{ doc_title }}">
 
-        <!-- ३. तारण, कर्ज व वित्तीय दस्त -->
-        <div class="section-title">३. तारण, कर्ज व वित्तीय दस्त</div>
-        <div class="grid-container">
-            <a href="/draft_form?type=तारण गहाणखत" class="doc-btn"><span class="icon">🏦</span>तारण गहाणखत</a>
-            <a href="/draft_form?type=भोगवटा गहाणखत" class="doc-btn"><span class="icon">🏡</span>भोगवटा गहाणखत</a>
-            <a href="/draft_form?type=गहाण मुक्तीपत्र" class="doc-btn"><span class="icon">🔓</span>गहाण मुक्तीपत्र</a>
-            <a href="/draft_form?type=ठेव पावती दस्त" class="doc-btn"><span class="icon">🧾</span>ठेव पावती दस्त</a>
-        </div>
+            <!-- १. तारण गहाणखतासाठी पतसंस्था निवड -->
+            {% if 'तारण' in doc_title or 'गहाण' in doc_title %}
+            <div class="card">
+                <h3>१. पतसंस्था / बँक निवड</h3>
+                <label>पतसंस्था / बँक निवडा:*</label>
+                <select name="selected_bank" id="selected_bank" onchange="fillBankDetails()">
+                    <option value="श्री दत्त नागरी सहकारी पतसंस्था मर्या हातकणंगले">श्री दत्त नागरी सहकारी पतसंस्था मर्या हातकणंगले</option>
+                    <option value="कुरुंदवाड अर्बन बँक शाखा हातकणंगले">कुरुंदवाड अर्बन बँक शाखा हातकणंगले</option>
+                    <option value="इतर बँक / पतसंस्था">इतर बँक / पतसंस्था</option>
+                </select>
+                <label>संस्थेचे चेअरमन / प्रतिनिधी नाव:</label>
+                <input type="text" name="bank_rep_name" id="bank_rep_name" value="विद्यमान चेअरमन">
+                <label>मीटिंग सभा व ठराव नंबर:</label>
+                <input type="text" name="bank_meeting_res" id="bank_meeting_res" value="सभा नं. 02 ठराव नं. 08 दि. 04/05/2026 (नोंदणी क्र. 402/83/84)">
+                <label>व्याजाचा दर (द.सा.द.शे.):</label>
+                <input type="text" name="bank_interest" id="bank_interest" value="13%">
+                <label>कर्ज मुदत:</label>
+                <input type="text" name="bank_tenure" id="bank_tenure" value="120 महिने (10 वर्षे)">
+            </div>
+            {% endif %}
 
-        <!-- ४. भाडेतत्त्व व करार दस्त -->
-        <div class="section-title">४. भाडेतत्त्व व करार दस्त</div>
-        <div class="grid-container">
-            <a href="/draft_form?type=साठेखत / इसारपावती" class="doc-btn"><span class="icon">📝</span>इसारपावती / साठेखत</a>
-            <a href="/draft_form?type=कब्जा साठेखत" class="doc-btn"><span class="icon">🔑</span>कब्जा साठेखत</a>
-            <a href="/draft_form?type=भाडेकरार" class="doc-btn"><span class="icon">🏢</span>भाडेकरार (Rent Agreement)</a>
-            <a href="/draft_form?type=लिव्ह अँड लायसन्स" class="doc-btn"><span class="icon">📄</span>लिव्ह अँड लायसन्स</a>
-            <a href="/draft_form?type=दीर्घमुदतीचा पट्टा" class="doc-btn"><span class="icon">🗓️</span>दीर्घमुदतीचा पट्टा (Lease)</a>
-            <a href="/draft_form?type=पट्टा समाप्ती दस्त" class="doc-btn"><span class="icon">⏹️</span>पट्टा समाप्ती दस्त</a>
-        </div>
+            <!-- २. दस्त व मिळकत प्राथमिक माहिती -->
+            <div class="card">
+                <h3>२. दस्त व मिळकत प्राथमिक माहिती</h3>
+                
+                {% if 'करार' in doc_title %}
+                <label>करारपत्र दस्त क्रमांक व तारीख:</label>
+                <input type="text" name="karar_ref" id="karar_ref" value="दस्त नं. 6710, दि. 31/07/2024">
+                {% endif %}
 
-        <!-- ५. वारसाहक्क व कुटुंबविषयक दस्त -->
-        <div class="section-title">५. वारसाहक्क व कुटुंबविषयक दस्त</div>
-        <div class="grid-container">
-            <a href="/draft_form?type=मृत्युपत्र" class="doc-btn"><span class="icon">📜</span>मृत्युपत्र (Will)</a>
-            <a href="/draft_form?type=मृत्युपत्र फेरफार पत्र" class="doc-btn"><span class="icon">✏️</span>मृत्युपत्र दुरुस्ती/फेरफार</a>
-            <a href="/draft_form?type=कौटुंबिक व्यवस्था पत्र" class="doc-btn"><span class="icon">👨‍👩‍👧‍👦</span>कौटुंबिक व्यवस्था पत्र</a>
-            <a href="/draft_form?type=दत्तकविधान पत्र" class="doc-btn"><span class="icon">👶</span>दत्तकविधान पत्र</a>
-        </div>
+                <label>दस्त दिनांक:</label>
+                <input type="text" name="doc_date" id="doc_date" value="01/06/2026" required>
 
-        <!-- ६. दुरुस्ती व घोषणापत्र -->
-        <div class="section-title">६. दुरुस्ती व घोषणापत्र</div>
-        <div class="grid-container">
-            <a href="/draft_form?type=दुरुस्तीपत्र" class="doc-btn"><span class="icon">🛠️</span>दुरुस्तीपत्र (Correction)</a>
-            <a href="/draft_form?type=प्रतिज्ञापत्र / घोषणापत्र" class="doc-btn"><span class="icon">📋</span>प्रतिज्ञापत्र / घोषणापत्र</a>
-        </div>
+                <label>मिळकतीचे गाव व तालुका:</label>
+                <input type="text" name="village_taluka" id="village_taluka" value="आळते, ता.हातकणंगले" required>
 
-        <a href="/" class="back-btn">← मुख्य पानावर परत जा</a>
+                <label>जिल्हा व तुकडी:</label>
+                <input type="text" name="dist_division" value="जिल्हा व तुकडी कोल्हापूर" required>
+
+                <label>व्यवहार / मूल्यांकन / कर्ज रक्कम (अंकी रु.):</label>
+                <input type="text" name="amount_num" id="amount_num" value="3,00,000/-" required>
+
+                <label>रक्कम अक्षरी:</label>
+                <input type="text" name="amount_words" id="amount_words" value="तीन लाख फक्त" required>
+            </div>
+
+            <!-- ३. एकसमान पक्षकार नोंदणी -->
+            <div class="card">
+                <h3>👥 ३. पक्षकारांची संपूर्ण माहिती</h3>
+                <div id="parties_container">
+                    
+                    <div class="party-card" id="party_0">
+                        <div class="upload-section">
+                            <div class="upload-box">
+                                <span>१. आधार समोर (Front)</span>
+                                <input type="file" accept="image/*,.pdf" onchange="readCardOCR(this, 'party_0')">
+                            </div>
+                            <div class="upload-box">
+                                <span>२. आधार मागील बाजू (पत्ता)</span>
+                                <input type="file" accept="image/*,.pdf" onchange="readCardOCR(this, 'party_0')">
+                            </div>
+                            <div class="upload-box">
+                                <span>३. पॅन कार्ड समोर</span>
+                                <input type="file" accept="image/*,.pdf" onchange="readCardOCR(this, 'party_0')">
+                            </div>
+                            <div class="status-txt" id="status_party_0"></div>
+                        </div>
+
+                        <label>पक्षकाराचा प्रकार निवडा:*</label>
+                        <select name="party_role[]" required>
+                            <option value="लिहून घेणार">लिहून घेणार (खरेदी घेणारा / बँक)</option>
+                            <option value="लिहून देणार">लिहून देणार (खरेदी देणारा / कर्जदार)</option>
+                            <option value="मान्यता देणार">मान्यता देणार / संमती देणार</option>
+                            <option value="लिहून देणार यांच्या तर्फे वटमुखत्यार">लिहून देणार यांच्या तर्फे वटमुखत्यार</option>
+                            <option value="जामीनदार">जामीनदार</option>
+                            <option value="साक्षीदार">साक्षीदार</option>
+                        </select>
+
+                        <label>संपूर्ण नाव (मराठीत):*</label>
+                        <input type="text" name="party_name[]" class="field_name" placeholder="उदा. अनिता पुंडलिक बिरंजे" required>
+
+                        <label>वय (वर्षे):*</label>
+                        <input type="text" name="party_age[]" class="field_age" placeholder="उदा. वय 38 वर्षे">
+
+                        <label>धंदा:*</label>
+                        <input type="text" name="party_occ[]" class="field_occ" placeholder="उदा. घरकाम / शेती / व्यवसाय">
+
+                        <label>संपूर्ण पत्ता व पिनकोड (मराठीत):*</label>
+                        <textarea name="party_address[]" class="field_address" rows="2" placeholder="रा. --, ता. --, जि. --, पिन कोड- --" required></textarea>
+
+                        <label>ओळख क्रमांक (आधार):</label>
+                        <input type="text" name="party_aadhar[]" class="field_aadhar" placeholder="xxxx xxxx xxxx">
+
+                        <label>पॅन नंबर:</label>
+                        <input type="text" name="party_pan[]" class="field_pan" placeholder="PAN Number">
+
+                        <label>मोबाईल नंबर:</label>
+                        <input type="text" name="party_mobile[]" class="field_mobile" placeholder="मोबाईल नंबर">
+                    </div>
+                </div>
+
+                <button type="button" class="btn-add" onclick="addNewParty()">+ आणखी पक्षकार जोडा</button>
+            </div>
+
+            <!-- ४. मिळकतीचे वर्णन व चतुःसीमा -->
+            <div class="card">
+                <h3>४. मिळकतीचे वर्णन व चतुःसीमा</h3>
+                <label>गट नंबर / सि.स.नं. / प्लॉट क्र.:</label>
+                <input type="text" name="gat_no" id="gat_no" value="309" required>
+
+                <label>एकूण क्षेत्र व आकार:</label>
+                <input type="text" name="total_area" id="total_area" value="0 हे 17 आर आकार 0 रुपये 41 पैसे" required>
+
+                <label>व्यवहाराचे / हस्तांतरित क्षेत्र व आकार:</label>
+                <input type="text" name="sold_area" id="sold_area" value="0 हे 03 आर 01 पॉ. आकार 0 रुपये 01 पैसे" required>
+
+                <label>पूर्वेस:</label>
+                <input type="text" name="east" id="east" value="रस्ता" required>
+                <label>पश्चिमेस:</label>
+                <input type="text" name="west" id="west" value="मिळकत" required>
+                <label>दक्षिणेस:</label>
+                <input type="text" name="south" id="south" value="मिळकत" required>
+                <label>उत्तरेस:</label>
+                <input type="text" name="north" id="north" value="रस्ता" required>
+            </div>
+
+            <!-- ५. भरणा तपशील -->
+            <div class="card">
+                <h3>५. भरणा तपशील (लागू असल्यास)</h3>
+                <div id="payment_container">
+                    <div class="party-card" id="pay_0">
+                        <label>रक्कम रु.:</label>
+                        <input type="text" name="pay_amt[]" placeholder="उदा. 1,00,000/-">
+                        <label>रक्कम अक्षरी:</label>
+                        <input type="text" name="pay_words[]" placeholder="उदा. एक लाख फक्त">
+                        <label>बँक नाव व शाखा:</label>
+                        <input type="text" name="pay_bank[]" placeholder="बँकेचे नाव व शाखा">
+                        <label>माध्यम (चेक/RTGS/डीडी):</label>
+                        <input type="text" name="pay_mode[]" placeholder="RTGS ने / चेक नं.">
+                    </div>
+                </div>
+                <button type="button" class="btn-add" style="background:#0284c7;" onclick="addPayment()">+ आणखी भरणा नोंद जोडा</button>
+            </div>
+
+            <button type="submit" class="submit-btn">📥 Word (.docx) दस्त डाउनलोड करा</button>
+        </form>
     </div>
 
-</body>
-</html>
+    <script>
+        let partyCounter = 1;
+        let payCounter = 1;
+
+        function fillBankDetails() {
+            const bank = document.getElementById('selected_bank').value;
+            if (bank && bank.includes('दत्त')) {
+                document.getElementById('bank_rep_name').value = 'विद्यमान चेअरमन श्री दत्त नागरी पतसंस्था';
+                document.getElementById('bank_meeting_res').value = 'सभा नं. 02 ठराव नं. 08 दि. 04/05/2026 (नोंदणी क्र. 402/83/84)';
+                document.getElementById('bank_interest').value = '13%';
+                document.getElementById('bank_tenure').value = '120 महिने (10 वर्षे)';
+            }
+        }
+
+        function addNewParty() {
+            const id = 'party_' + partyCounter++;
+            const container = document.getElementById('parties_container');
+            const div = document.createElement('div');
+            div.className = 'party-card';
+            div.id = id;
+            div.innerHTML = `
+                <button type="button" class="btn-remove" onclick="document.getElementById('${id}').remove()">काढून टाका ✕</button>
+                <div class="upload-section">
+                    <div class="upload-box">
+                        <span>१. आधार समोर (Front)</span>
+                        <input type="file" accept="image/*,.pdf" onchange="readCardOCR(this, '${id}')">
+                    </div>
+                    <div class="upload-box">
+                        <span>२. आधार मागील बाजू (पत्ता)</span>
+                        <input type="file" accept="image/*,.pdf" onchange="readCardOCR(this, '${id}')">
+                    </div>
+                    <div class="upload-box">
+                        <span>३. पॅन कार्ड समोर</span>
+                        <input type="file" accept="image/*,.pdf" onchange="readCardOCR(this, '${id}')">
+                    </div>
+                    <div class="status-txt" id="status_${id}"></div>
+                </div>
+
+                <label>पक्षकाराचा प्रकार निवडा:*</label>
+                <select name="party_role[]" required>
+                    <option value="लिहून देणार">लिहून देणार</option>
+                    <option value="लिहून घेणार">लिहून घेणार</option>
+                    <option value="मान्यता देणार">मान्यता देणार / संमती देणार</option>
+                    <option value="लिहून देणार यांच्या तर्फे वटमुखत्यार">लिहून देणार यांच्या तर्फे वटमुखत्यार</option>
+                    <option value="जामीनदार">जामीनदार</option>
+                    <option value="साक्षीदार">साक्षीदार</option>
+                </select>
+
+                <label>संपूर्ण नाव (मराठीत):*</label>
+                <input type="text" name="party_name[]" class="field_name" required>
+
+                <label>वय (वर्षे):*</label>
+                <input type="text" name="party_age[]" class="field_age">
+
+                <label>धंदा:*</label>
+                <input type="text" name="party_occ[]" class="field_occ" placeholder="घरकाम / शेती / व्यवसाय">
+
+                <label>संपूर्ण पत्ता व पिनकोड (मराठीत):*</label>
+                <textarea name="party_address[]" class="field_address" rows="2" required></textarea>
+
+                <label>ओळख क्रमांक (आधार):</label>
+                <input type="text" name="party_aadhar[]" class="field_aadhar">
+
+                <label>पॅन नंबर:</label>
+                <input type="text" name="party_pan[]" class="field_pan">
+
+                <label>मोबाईल नंबर:</label>
+                <input type="text" name="party_mobile[]" class="field_mobile">
+            `;
+            container.appendChild(div);
+        }
+
+        function addPayment() {
+            const id = 'pay_' + payCounter++;
+            const container = document.getElementById('payment_container');
+            const div = document.createElement('div');
+            div.className = 'party-card';
+            div.id = id;
+            div.innerHTML = `
+                <button type="button" class="btn-remove" onclick="document.getElementById('${id}').remove()">काढून टाका ✕</button>
+                <label>रक्कम रु.:</label>
+                <input type="text" name="pay_amt[]" placeholder="उदा. 1,00,000/-">
+                <label>रक्कम अक्षरी:</label>
+                <input type="text" name="pay_words[]" placeholder="उदा. एक लाख फक्त">
+                <label>बँक नाव व शाखा:</label>
+                <input type="text" name="pay_bank[]" placeholder="बँकेचे नाव व शाखा">
+                <label>माध्यम:</label>
+                <input type="text" name="pay_mode[]" placeholder="RTGS / चेक">
+            `;
+            container.appendChild(div);
+        }
+
+        async function toMarathi(text) {
+            if
